@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Quiz Repertório</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Young+Serif&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Ideia: fichas de catálogo de biblioteca sobre feltro verde. Classes com números Dewey; lombadas mais altas, fichas mais difíceis. */
+  --felt:#13241f;
+  --paper:#eceee6;
+  --ink:#16201d;
+  --brass:#d6ab4c;
+  --ok:#1f7a4d;
+  --bad:#b3341f;
+  --display:"Young Serif",Georgia,"Times New Roman",serif;
+  --body:"Newsreader",Georgia,"Times New Roman",serif;
+  --mono:"Courier Prime","Courier New",monospace;
+  --raise:color-mix(in srgb,var(--paper) 7%,var(--felt));
+  --rule:color-mix(in srgb,var(--paper) 18%,var(--felt));
+  --mute:color-mix(in srgb,var(--paper) 64%,var(--felt));
+  --ink-mute:color-mix(in srgb,var(--ink) 66%,var(--paper));
+  --ok-lt:color-mix(in srgb,var(--ok) 58%,#fff);
+  --bad-lt:color-mix(in srgb,var(--bad) 52%,#fff);
+  --shelf:color-mix(in srgb,var(--brass) 55%,var(--felt));
+  --track:color-mix(in srgb,var(--brass) 16%,var(--felt));
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--felt)}
+body{
+  margin:0;min-height:100%;
+  background:radial-gradient(900px 520px at 50% -8%,color-mix(in srgb,var(--paper) 8%,var(--felt)),var(--felt) 70%) var(--felt);
+  color:var(--paper);font-family:var(--body);font-size:18px;line-height:1.5;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:720px;margin:0 auto;padding:28px 16px 56px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tag{font-family:var(--mono);font-size:.78rem;font-weight:400;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);margin:0}
+.tag.brass{color:var(--brass)}
+button{font:inherit}
+.unit{font-family:var(--mono);font-weight:400;font-size:.76rem;letter-spacing:.02em;color:var(--mute)}
+.note{margin:8px 0 0;font-size:.95rem;color:var(--mute);max-width:42em}
+.note+.note{margin-top:8px}
+
+/* ---------- marcas de nível ---------- */
+.pips{display:inline-flex;align-items:flex-end;gap:2px;flex:none}
+.pips i{display:block;width:6px;height:6px;border:1.2px solid currentColor;border-radius:1px}
+.pips i.on{background:currentColor}
+.pips.rise i:nth-child(1){height:5px}
+.pips.rise i:nth-child(2){height:8px}
+.pips.rise i:nth-child(3){height:11px}
+
+/* ---------- início ---------- */
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(2.9rem,12vw,4.8rem);line-height:1;letter-spacing:-.01em;margin:10px 0 14px}
+.hero h1 span{color:var(--brass)}
+.lede{max-width:34em;margin:0;color:color-mix(in srgb,var(--paper) 88%,var(--felt));text-wrap:pretty}
+.spines{display:flex;align-items:flex-end;gap:5px;border-bottom:5px solid var(--shelf);margin:26px 0 0;padding-right:8px;overflow:hidden}
+.spines span{
+  position:relative;width:30px;padding:20px 0 8px;display:grid;place-items:center;flex:none;
+  background:var(--bg);color:var(--fg);border-radius:3px 3px 0 0;
+  font-family:var(--mono);font-weight:700;font-size:.78rem;letter-spacing:.08em;writing-mode:vertical-rl;
+}
+.spines span::before{content:"";position:absolute;left:0;right:0;top:7px;height:3px;background:color-mix(in srgb,var(--fg) 30%,transparent)}
+
+/* ---------- ficha do leitor e estatísticas ---------- */
+.readerbox{margin:28px 0 0}
+.rhead{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.periods{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 8px}
+.periods label{position:relative;cursor:pointer}
+.periods input{position:absolute;opacity:0;inset:0;margin:0;width:100%;height:100%;cursor:pointer}
+.periods span{display:inline-flex;align-items:center;min-height:40px;padding:6px 13px;border:1.5px solid var(--rule);border-radius:99px;font-family:var(--mono);font-size:.76rem;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);transition:border-color .12s,color .12s,background .12s}
+.periods label:hover span{border-color:color-mix(in srgb,var(--paper) 40%,var(--felt))}
+.periods input:checked+span{border-color:var(--brass);color:var(--brass);background:var(--raise)}
+.periods input:focus-visible+span{outline:3px solid var(--brass);outline-offset:2px}
+.pdesc{margin:0 0 12px;font-size:.92rem;color:var(--mute)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);margin:0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.kpis.k3{grid-template-columns:repeat(3,1fr)}
+.kpis.k2{grid-template-columns:repeat(2,1fr)}
+.kpis div{padding:12px 6px 12px 0;min-width:0;display:flex;flex-direction:column;justify-content:space-between}
+.kpis div+div{padding-left:14px;border-left:1px solid var(--rule)}
+.kpis dt{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.kpis dd{margin:2px 0 0;font-family:var(--body);font-weight:600;font-size:1.55rem;line-height:1.2;color:var(--paper)}
+.kpis dd.big{color:var(--brass)}
+.kpis .sub{display:block;font-family:var(--mono);font-weight:400;font-size:.72rem;letter-spacing:.02em;color:var(--mute);margin-top:3px}
+.delta{display:block;font-family:var(--mono);font-weight:700;font-size:.76rem;margin-top:5px}
+.delta.up{color:var(--ok-lt)}
+.delta.down{color:var(--bad-lt)}
+.delta.flat{color:var(--mute)}
+.sth{font-family:var(--display);font-weight:400;font-size:clamp(2.1rem,9vw,3rem);line-height:1.05;margin:6px 0 10px}
+#st-h:focus,#rtitle:focus{outline:none}
+.sec{margin:30px 0 0}
+.sec>.tag{margin-bottom:6px}
+.srow{display:grid;grid-template-columns:64px minmax(0,1fr) 104px;grid-template-areas:"code name pct" "code bar cnt";column-gap:12px;row-gap:6px;align-items:center;padding:10px 8px;border-bottom:1px solid var(--rule);border-radius:4px}
+.srow:hover{background:var(--raise)}
+.srow .code{grid-area:code;align-self:start;padding-top:2px;font-family:var(--mono);font-weight:700;font-size:.98rem;color:var(--mute)}
+.srow .name{grid-area:name;min-width:0}
+.srow .pct{grid-area:pct;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.srow .cnt{grid-area:cnt;text-align:right;white-space:nowrap;font-family:var(--mono);font-size:.74rem;color:var(--mute);font-variant-numeric:tabular-nums}
+.meter{grid-area:bar;display:block;height:10px;border-radius:0 4px 4px 0;background:var(--track);overflow:hidden}
+.meter>span{display:block;height:100%;background:var(--brass);border-radius:0 4px 4px 0}
+.srow.empty .name,.srow.empty .pct{color:var(--mute)}
+.recent{list-style:none;margin:0;padding:0}
+.recent li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 14px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--rule)}
+.recent time{font-family:var(--mono);font-size:.76rem;color:var(--mute);white-space:nowrap}
+.recent .what{min-width:0}
+.recent small{display:block;font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+.recent .rres{text-align:right;white-space:nowrap;font-weight:600}
+.recent .rres small{text-transform:none}
+.empty-note{margin:10px 0 0;color:var(--mute)}
+
+/* ---------- montagem da rodada ---------- */
+fieldset{border:0;margin:28px 0 0;padding:0;min-width:0}
+legend{padding:0;margin:0 0 10px}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.seg label{position:relative;display:block;cursor:pointer}
+.seg input{position:absolute;opacity:0;inset:0;margin:0;width:100%;height:100%;cursor:pointer}
+.seg-b{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:8px 6px;border:1.5px solid var(--rule);border-radius:5px;font-family:var(--mono);font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);transition:border-color .12s,color .12s,background .12s}
+.seg label:hover .seg-b{border-color:color-mix(in srgb,var(--paper) 40%,var(--felt))}
+.seg input:checked+.seg-b{border-color:var(--brass);color:var(--brass);background:var(--raise)}
+.seg input:focus-visible+.seg-b{outline:3px solid var(--brass);outline-offset:2px}
+.levels:disabled .seg{opacity:.4}
+.levels:disabled .seg label{cursor:default}
+.mode-desc{margin:8px 0 0;font-size:.98rem;color:var(--mute);min-height:1.5em}
+.cats{display:grid;gap:8px}
+.cat{display:block;position:relative;cursor:pointer}
+.cat input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer;width:100%;height:100%}
+.cat-body{display:grid;grid-template-columns:72px 1fr auto;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--rule);border-radius:6px;transition:border-color .12s,background .12s}
+.dw{font-family:var(--mono);font-weight:700;font-size:1.2rem;color:var(--mute);white-space:nowrap}
+.nm strong{display:block;font-family:var(--display);font-weight:400;font-size:1.15rem;line-height:1.3}
+.nm em{display:block;font-style:normal;color:var(--mute);font-size:.95rem;line-height:1.35}
+.ct{font-family:var(--mono);font-size:.76rem;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.mast{display:flex;align-items:center;gap:8px;margin-top:6px;font-family:var(--mono);font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.mbar{flex:none;width:96px;height:4px;border-radius:2px;background:var(--rule);overflow:hidden}
+.mbar>span{display:block;height:100%;background:var(--brass)}
+.cat:hover .cat-body{border-color:color-mix(in srgb,var(--paper) 40%,var(--felt))}
+.cat input:checked+.cat-body{border-color:var(--brass);background:var(--raise)}
+.cat input:checked+.cat-body .dw,.cat input:checked+.cat-body .ct{color:var(--brass)}
+.cat input:focus-visible+.cat-body{outline:3px solid var(--brass);outline-offset:2px}
+.cat.rev .dw{color:var(--bad-lt)}
+.dock{position:sticky;bottom:0;z-index:2;margin:14px -16px 0;padding:12px 16px 14px;background:var(--felt);border-top:1px solid var(--rule);box-shadow:0 -14px 24px -14px rgba(0,0,0,.55);display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;justify-content:space-between}
+.sw{display:inline-flex;align-items:center;gap:10px;cursor:pointer;position:relative;min-height:44px}
+.sw input{position:absolute;opacity:0;inset:0;margin:0;width:100%;height:100%;cursor:pointer}
+.sw-box{width:40px;height:22px;border-radius:11px;background:var(--rule);position:relative;transition:background .15s;flex:none}
+.sw-box::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--paper);transition:transform .15s}
+.sw input:checked+.sw-box{background:var(--brass)}
+.sw input:checked+.sw-box::after{transform:translateX(18px);background:var(--ink)}
+.sw input:focus-visible+.sw-box{outline:3px solid var(--brass);outline-offset:3px}
+.sw small{font-family:var(--mono);font-size:.74rem;color:var(--mute)}
+
+/* ---------- botões ---------- */
+.btn{
+  font-family:var(--mono);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:.9rem;
+  min-height:48px;padding:12px 20px;border-radius:5px;border:1.5px solid var(--brass);
+  background:var(--brass);color:var(--ink);cursor:pointer;transition:background .12s,border-color .12s;
+}
+.btn:hover{background:color-mix(in srgb,var(--brass) 82%,#fff)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn .cnt{font-weight:400;opacity:.85}
+.btn.ghost{background:transparent;color:var(--paper);border-color:var(--rule)}
+.btn.ghost:hover{border-color:var(--paper)}
+.btn:focus-visible,.link:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
+.link{
+  background:none;border:0;color:var(--mute);font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;
+  text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px 2px;min-height:44px;
+}
+.link:disabled{opacity:.4;text-decoration:none;cursor:default}
+
+/* ---------- jogo ---------- */
+.hud{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.hud-l{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;padding:3px 10px;border-radius:99px;background:color-mix(in srgb,var(--brass) 22%,var(--felt));color:var(--brass)}
+.score{text-align:right;line-height:1}
+.score b{display:block;font-family:var(--body);font-weight:600;font-size:1.9rem;color:var(--brass);margin-top:4px}
+.shelf{display:flex;align-items:flex-end;gap:4px;height:56px;margin:0 0 14px;padding:0;list-style:none;border-bottom:5px solid var(--shelf)}
+.shelf li{flex:1;position:relative;border-radius:2px 2px 0 0;background:color-mix(in srgb,var(--paper) 16%,var(--felt))}
+.shelf li::after{content:"";position:absolute;left:0;right:0;top:7px;height:3px;background:rgba(0,0,0,.22)}
+.shelf li.cur{background:var(--brass)}
+.shelf li.ok{background:var(--ok-lt)}
+.shelf li.no{background:transparent;box-shadow:inset 0 0 0 2px var(--bad-lt)}
+.shelf li.no::after{background:var(--bad-lt);opacity:.7}
+.trow{display:flex;align-items:center;gap:12px;margin:0 0 14px}
+.timer{flex:1;height:6px;border-radius:3px;background:var(--rule);overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:var(--brass);transform-origin:left center;will-change:transform}
+.timer i.low{background:var(--bad-lt)}
+#tnum{min-width:3.2em;text-align:right;font-variant-numeric:tabular-nums}
+.card{position:relative;background:var(--paper);color:var(--ink);border-radius:6px;padding:16px 20px 20px;box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 16px 32px -14px rgba(0,0,0,.6)}
+.card :focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.card-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;padding-bottom:10px;font-family:var(--mono);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);border-bottom:1px solid color-mix(in srgb,var(--bad) 45%,var(--paper))}
+.lvl{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.q{font-family:var(--display);font-weight:400;font-size:clamp(1.3rem,4.8vw,1.75rem);line-height:1.25;margin:18px 0 18px;text-wrap:balance}
+#qtitle:focus{outline:none}
+.opts{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.opt{
+  display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:center;width:100%;min-height:54px;
+  padding:9px 14px 9px 10px;text-align:left;font-size:1.06rem;line-height:1.35;color:var(--ink);background:transparent;
+  border:1.5px solid color-mix(in srgb,var(--ink) 28%,var(--paper));border-radius:5px;cursor:pointer;
+  transition:background .12s,border-color .12s,opacity .12s;
+}
+.opt .k{display:grid;place-items:center;width:30px;height:30px;border:1.5px solid currentColor;border-radius:3px;font-family:var(--mono);font-weight:700;font-size:.95rem}
+.opt:hover:not(:disabled){background:color-mix(in srgb,var(--ink) 7%,var(--paper));border-color:var(--ink)}
+.opt:disabled{cursor:default}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--paper))}
+.opt.ok .k{background:var(--ok);border-color:var(--ok);color:var(--paper)}
+.opt.no{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 11%,var(--paper))}
+.opt.no .k{background:var(--bad);border-color:var(--bad);color:var(--paper)}
+.opt.dim{opacity:.55}
+.opt.gone{opacity:.3;text-decoration:line-through}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 12px;margin-top:14px;min-height:50px}
+.card .link{color:var(--ink-mute)}
+.hint{font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-mute)}
+.pts-w{margin-left:auto;text-align:right;line-height:1.25}
+.pts{display:block;font-family:var(--mono);font-weight:700;font-size:1.05rem}
+.pts-sub{display:block;font-family:var(--mono);font-size:.72rem;color:var(--ink-mute)}
+.stamp{
+  display:inline-block;font-family:var(--mono);font-weight:700;font-size:1rem;letter-spacing:.14em;text-transform:uppercase;
+  padding:4px 12px;border:3px double currentColor;border-radius:4px;transform:rotate(-6deg);transform-origin:left center;opacity:.92;
+  animation:stamp .26s cubic-bezier(.2,.9,.3,1.2) both;
+}
+.stamp.ok{color:var(--ok)}
+.stamp.no{color:var(--bad)}
+@keyframes stamp{from{transform:rotate(-6deg) scale(1.7);opacity:0}}
+.fact{margin-top:16px;padding:14px 16px 16px;border-left:3px solid var(--brass);background:var(--raise);border-radius:0 6px 6px 0}
+.fact p+p{margin:6px 0 0;font-size:1.06rem}
+.nextrow{display:flex;justify-content:flex-end;margin-top:16px}
+
+/* ---------- resultado ---------- */
+.result h2{font-family:var(--display);font-weight:400;font-size:clamp(2.1rem,9vw,3.2rem);line-height:1.05;margin:8px 0 8px;text-wrap:balance}
+.result .msg{margin:0 0 18px;color:color-mix(in srgb,var(--paper) 88%,var(--felt));max-width:34em}
+.lvrow{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 12px}
+.lvchip{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border:1px solid var(--rule);border-radius:99px;font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;color:var(--paper)}
+.lvchip b{color:var(--brass)}
+.rshelf{margin-top:14px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.links{display:flex;flex-wrap:wrap;gap:0 22px;margin-top:6px}
+.copyout{margin:10px 0 0}
+.copyout input{width:100%;font-family:var(--mono);font-size:.85rem;padding:10px;border-radius:5px;border:1px solid var(--rule);background:var(--raise);color:var(--paper)}
+.review{margin:28px 0 0}
+.card.mini{margin-top:12px;padding:14px 18px 18px;content-visibility:auto;contain-intrinsic-size:auto 260px}
+.q.sm{font-size:1.18rem;margin:12px 0 10px}
+.card.mini p{margin:6px 0 0;font-size:1.02rem}
+.card.mini .given{color:var(--bad)}
+.card.mini .right{color:var(--ok);font-weight:600}
+.clean{margin:10px 0 0;color:var(--mute)}
+
+@media (max-width:560px){
+  .kpis:not(.k3):not(.k2){grid-template-columns:repeat(2,1fr)}
+  .kpis:not(.k3):not(.k2) div:nth-child(3){padding-left:0;border-left:0}
+  .kpis:not(.k3):not(.k2) div:nth-child(n+3){border-top:1px solid var(--rule)}
+}
+@media (max-width:480px){
+  .cat-body{grid-template-columns:60px 1fr}
+  .dw{font-size:1.05rem}
+  .ct{display:none}
+  .card{padding:14px 16px 18px}
+  .kpis dd{font-size:1.35rem}
+}
+@media (max-width:440px){.seg{grid-template-columns:repeat(2,1fr)}}
+@media (hover:none){.hint{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<div id="live" class="sr" aria-live="polite"></div>
+<script>
+'use strict';
+
+/* ================= classes, níveis, modos e períodos ================= */
+const CATS=[
+  {key:'fil',  dewey:'100',   name:'Filosofia',                       short:'Filosofia',      desc:'Pensadores e grandes ideias'},
+  {key:'psi',  dewey:'150',   name:'Psicologia',                      short:'Psicologia',     desc:'Mente, comportamento e grandes experimentos'},
+  {key:'cien', dewey:'500',   name:'Ciências',                        short:'Ciências',       desc:'Natureza, corpo e descobertas'},
+  {key:'neuro',dewey:'612.8', name:'Neurociências e Neuropsicologia', short:'Neurociências',  desc:'Cérebro, neurônios, lesões e testes'},
+  {key:'arte', dewey:'700',   name:'Artes e música',                  short:'Artes e música', desc:'Pintura, música, escultura e cinema'},
+  {key:'lit',  dewey:'800',   name:'Literatura',                      short:'Literatura',     desc:'Romances, poemas e seus autores'},
+  {key:'hist', dewey:'900',   name:'História',                        short:'História',       desc:'Da escrita ao século XX'},
+  {key:'geo',  dewey:'910',   name:'Geografia',                       short:'Geografia',      desc:'Países, mares e montanhas'},
+  {key:'br',   dewey:'981',   name:'Brasil',                          short:'Brasil',         desc:'História, cultura e território'}
+];
+const ALL={key:'all',dewey:'000',name:'Acervo completo',short:'Acervo completo',desc:'Fichas de todas as classes, misturadas'};
+const REV={key:'rev',dewey:'REV',name:'Caderno de revisão',short:'Revisão',desc:'Fichas que você errou; saem daqui quando você acerta'};
+const CATMAP={};CATS.forEach(function(c){CATMAP[c.key]=c;});
+const catOf=function(k){return k==='all'?ALL:k==='rev'?REV:(CATMAP[k]||ALL);};
+
+const LV={1:{name:'Fácil',pts:100,time:20},2:{name:'Médio',pts:150,time:25},3:{name:'Difícil',pts:200,time:30}};
+const MODES={
+  prog:{name:'Progressivo',rise:true,plan:[[1,5],[2,3],[3,2]],desc:'5 fichas fáceis, 3 médias e 2 difíceis, da mais simples para a mais difícil.'},
+  f:{name:'Fácil',lv:1,plan:[[1,10]],desc:'Só fichas fáceis, para aquecer ou começar um tema novo.'},
+  m:{name:'Médio',lv:2,plan:[[2,10]],desc:'Só fichas de nível médio.'},
+  d:{name:'Difícil',lv:3,plan:[[3,10]],desc:'Só fichas difíceis.'}
+};
+const PERIODS=[
+  {key:'all',name:'Todo o período',ms:0,desc:'Desde a primeira rodada.',vs:''},
+  {key:'1y',name:'1 ano',ms:365*864e5,desc:'Últimos 365 dias.',vs:'em relação aos 365 dias anteriores'},
+  {key:'1m',name:'1 mês',ms:30*864e5,desc:'Últimos 30 dias.',vs:'em relação aos 30 dias anteriores'},
+  {key:'1w',name:'1 semana',ms:7*864e5,desc:'Últimos 7 dias.',vs:'em relação aos 7 dias anteriores'},
+  {key:'1d',name:'1 dia',ms:864e5,desc:'Últimas 24 horas.',vs:'em relação às 24 horas anteriores'}
+];
+const PMAP={};PERIODS.forEach(function(p){PMAP[p.key]=p;});
+
+/* ================= acervo =================
+   [classe, nível (1 fácil, 2 médio, 3 difícil), pergunta, certa, errada, errada, errada, curiosidade]
+   A posição de cada ficha é o seu id: fichas novas entram sempre no fim. */
+const RAW=[
+/* ---- História ---- */
+["hist",1,"Qual civilização construiu Machu Picchu, no alto dos Andes?","Inca","Maia","Asteca","Olmeca","Foi erguida por volta de 1450, provavelmente como residência do imperador Pachacuti. Os conquistadores espanhóis, ao que tudo indica, nunca chegaram até ela, o que ajudou a preservá-la."],
+["hist",1,"Em que ano caiu o Muro de Berlim?","1989","1991","1985","1979","Em 9 de novembro de 1989 as passagens foram abertas, quase por acidente, depois de um anúncio confuso do governo da Alemanha Oriental. A reunificação alemã veio em outubro de 1990."],
+["hist",2,"Quem foi o primeiro imperador de Roma?","Augusto","Júlio César","Nero","Constantino","Otaviano recebeu o título de Augusto em 27 a.C. Júlio César, que muita gente imagina como imperador, foi ditador e morreu assassinado em 44 a.C., antes de o Império existir."],
+["hist",2,"A Peste Negra atingiu a Europa principalmente em qual século?","Século XIV","Século XII","Século XVI","Século X","Entre 1347 e 1351 a peste se espalhou pelas rotas comerciais e, segundo as estimativas, matou entre um terço e metade dos europeus."],
+["hist",2,"Qual documento de 1215 limitou o poder do rei da Inglaterra?","Magna Carta","Declaração de Direitos","Código de Hamurábi","Édito de Nantes","Foi imposta ao rei João Sem Terra por barões revoltados. A versão de 1215 foi anulada em poucos meses, mas o texto foi reeditado depois e virou símbolo da ideia de que até o rei está sujeito à lei."],
+["hist",2,"Quanto tempo durou, de fato, a Guerra dos Cem Anos entre Inglaterra e França?","116 anos","100 anos","87 anos","143 anos","Começou em 1337 e terminou em 1453, com longas tréguas no meio. O nome foi dado por historiadores séculos depois."],
+["hist",1,"Quem divulgou as 95 teses de 1517 que deram início à Reforma Protestante?","Martinho Lutero","João Calvino","Erasmo de Roterdã","Henrique VIII","As teses criticavam a venda de indulgências. Impressas e copiadas, espalharam-se rapidamente pela Alemanha graças à prensa de Gutenberg."],
+["hist",2,"Que império tinha Constantinopla como capital até 1453?","Bizantino","Otomano","Sassânida","Carolíngio","A cidade caiu diante do sultão otomano Mehmed II em 29 de maio de 1453. Muitos historiadores usam a data para marcar o fim da Idade Média."],
+["hist",1,"Por que a Pedra de Roseta, achada em 1799, foi tão importante?","Repetia o mesmo texto em três escritas e permitiu decifrar os hieróglifos","Mostrava o mapa do Egito antigo gravado em granito","Trazia a lista completa de todos os faraós egípcios","Marcava a entrada do túmulo do faraó Ramsés II","O texto aparece em hieróglifos, demótico e grego. Como o grego era conhecido, Jean-François Champollion o usou como ponto de comparação e decifrou os hieróglifos em 1822."],
+["hist",2,"Que povo da Mesopotâmia criou a escrita cuneiforme?","Sumérios","Persas","Fenícios","Hititas","Ela surgiu por volta de 3300 a.C., na cidade de Uruk, e servia para registrar estoques de grãos e dívidas. Poemas e leis vieram depois."],
+["hist",1,"Qual acontecimento foi o estopim da Primeira Guerra Mundial, em 1914?","O assassinato do arquiduque Francisco Ferdinando","A invasão da Polônia pela Alemanha nazista","O naufrágio do transatlântico britânico Lusitânia","A tomada do Palácio de Inverno em Petrogrado","O herdeiro do trono austro-húngaro foi morto em Sarajevo, em 28 de junho de 1914, pelo jovem nacionalista Gavrilo Princip. As alianças entre as potências transformaram a crise em guerra europeia em pouco mais de um mês."],
+["hist",1,"Quem foi o primeiro ser humano a ir ao espaço?","Yuri Gagarin","Neil Armstrong","Alan Shepard","John Glenn","Em 12 de abril de 1961, a bordo da Vostok 1, Gagarin deu uma volta completa na Terra em cerca de 108 minutos. Armstrong só pisaria na Lua em 1969."],
+/* ---- Brasil ---- */
+["br",1,"Em que ano o Brasil declarou a Independência?","1822","1808","1889","1831","O grito do Ipiranga foi em 7 de setembro de 1822. Portugal só reconheceu a independência em 1825, em troca de uma indenização."],
+["br",1,"Quem foi o último imperador do Brasil?","Dom Pedro II","Dom Pedro I","Dom João VI","Dom Manuel I","Governou por quase 50 anos e foi deposto pela Proclamação da República, em 1889. Morreu exilado em Paris, em 1891."],
+["br",1,"Qual foi a primeira capital do Brasil?","Salvador","Rio de Janeiro","Recife","Olinda","Salvador foi capital colonial de 1549 a 1763, quando o posto passou ao Rio de Janeiro, onde ficou até a inauguração de Brasília."],
+["br",1,"Em que ano foi assinada a Lei Áurea, que aboliu a escravidão no Brasil?","1888","1871","1850","1889","Foi assinada pela princesa Isabel em 13 de maio de 1888. O Brasil foi o último país das Américas a abolir a escravidão."],
+["br",1,"Que presidente inaugurou Brasília, em 1960?","Juscelino Kubitschek","Getúlio Vargas","Jânio Quadros","Eurico Gaspar Dutra","Juscelino prometeu “cinquenta anos em cinco” e entregou a nova capital em 21 de abril de 1960. O plano urbanístico é de Lúcio Costa, e os prédios principais são de Oscar Niemeyer."],
+["br",1,"Qual é o maior bioma brasileiro em extensão?","Amazônia","Cerrado","Mata Atlântica","Caatinga","A Amazônia cobre quase metade do território nacional. O Cerrado vem em segundo, com cerca de um quarto."],
+["br",2,"Quem pintou o quadro Abaporu, de 1928?","Tarsila do Amaral","Anita Malfatti","Di Cavalcanti","Cândido Portinari","Tarsila deu a tela de presente a Oswald de Andrade, que a viu como ponto de partida do Movimento Antropofágico. O nome vem do tupi e significa, aproximadamente, “homem que come gente”."],
+["br",2,"Que grupo indígena ocupava boa parte do litoral quando os portugueses chegaram, em 1500?","Os tupis","Os jês","Os incas","Os astecas","Povos de língua tupi viviam em grande parte da costa. Palavras como “abacaxi”, “jacaré” e “Ipanema” vêm do tupi."],
+["br",1,"Que movimento a Semana de Arte Moderna de 1922 ajudou a lançar no Brasil?","Modernismo","Romantismo","Barroco","Parnasianismo","Aconteceu no Theatro Municipal de São Paulo e foi vaiada por parte do público. Reuniu nomes como Mário de Andrade, Oswald de Andrade, Anita Malfatti e Villa-Lobos."],
+["br",2,"Qual é o ponto mais alto do Brasil?","Pico da Neblina","Pico da Bandeira","Monte Roraima","Pedra da Mina","Com 2.995 metros, fica no Amazonas, perto da fronteira com a Venezuela. O Pico da Bandeira, bem mais fácil de visitar, fica só na terceira posição."],
+["br",1,"Quem liderou o Quilombo dos Palmares até sua morte, em 1695?","Zumbi","Tiradentes","Frei Caneca","Cunhambebe","Palmares, na Serra da Barriga, chegou a reunir milhares de pessoas. O 20 de novembro, data da morte de Zumbi, é o Dia Nacional de Zumbi e da Consciência Negra, feriado nacional desde 2024."],
+["br",1,"Qual rio brasileiro é conhecido como Velho Chico?","São Francisco","Paraná","Tocantins","Madeira","Nasce na Serra da Canastra, em Minas Gerais, e corre por cerca de 2.800 km até o Atlântico, entre Sergipe e Alagoas. Atravessa o sertão semiárido e por isso é chamado de rio da integração nacional."],
+/* ---- Ciências ---- */
+["cien",1,"Qual é o único metal líquido à temperatura ambiente?","Mercúrio","Gálio","Chumbo","Zinco","O mercúrio só solidifica abaixo de −39 °C. O gálio derrete a cerca de 30 °C: sólido na bancada, líquido na palma da mão."],
+["cien",1,"Qual é o osso mais longo do corpo humano?","Fêmur","Tíbia","Úmero","Fíbula","O fêmur, na coxa, mede cerca de um quarto da altura da pessoa. Também é o osso mais resistente do corpo."],
+["cien",2,"Quantos corações tem um polvo?","Três","Um","Dois","Oito","Dois bombeiam o sangue pelas brânquias e um o distribui pelo resto do corpo. O sangue é azulado porque usa cobre, e não ferro, para transportar oxigênio."],
+["cien",1,"Quem apresentou a teoria da evolução por seleção natural em A Origem das Espécies, de 1859?","Charles Darwin","Jean-Baptiste Lamarck","Gregor Mendel","Thomas Huxley","Darwin demorou cerca de vinte anos para publicar. Só se decidiu quando soube que Alfred Russel Wallace havia chegado a ideias parecidas por conta própria."],
+["cien",2,"Qual é o planeta mais quente do Sistema Solar?","Vênus","Mercúrio","Marte","Júpiter","Vênus passa de 460 °C por causa do efeito estufa de sua atmosfera de gás carbônico. É mais quente que Mercúrio, que está bem mais perto do Sol."],
+["cien",2,"Qual é o gás mais abundante na atmosfera da Terra?","Nitrogênio","Oxigênio","Gás carbônico","Argônio","O nitrogênio responde por cerca de 78% do ar. O oxigênio, que respiramos, ocupa só uns 21%."],
+["cien",1,"Quanto tempo a luz do Sol leva para chegar à Terra?","Cerca de 8 minutos","Cerca de 8 segundos","Cerca de 1 hora","Menos de 1 segundo","São cerca de 8 minutos e 20 segundos. O Sol que você vê no céu é, portanto, o Sol de 8 minutos atrás."],
+["cien",1,"Quem descobriu a penicilina, em 1928?","Alexander Fleming","Louis Pasteur","Robert Koch","Edward Jenner","Fleming notou que um fungo numa placa de cultura esquecida impedia o crescimento de bactérias. A produção em larga escala só veio nos anos 1940, com Howard Florey e Ernst Chain."],
+["cien",2,"Quem é a única pessoa a ganhar o Nobel em duas ciências diferentes?","Marie Curie","Rosalind Franklin","Lise Meitner","Dorothy Hodgkin","Marie Curie ganhou o de Física em 1903 e o de Química em 1911, ambos ligados ao estudo da radioatividade."],
+["cien",1,"Por que o céu é azul durante o dia?","O ar espalha a luz azul do Sol mais que as outras cores","O céu reflete a cor dos oceanos","O oxigênio do ar tem cor azulada","A atmosfera absorve o vermelho e o verde","É o espalhamento de Rayleigh. No pôr do sol a luz atravessa mais atmosfera, o azul se perde pelo caminho e sobra o vermelho."],
+["cien",1,"Qual é o elemento químico mais abundante do universo?","Hidrogênio","Oxigênio","Hélio","Carbono","O hidrogênio forma cerca de três quartos da matéria comum. O hélio vem em segundo; todos os demais elementos juntos somam pouco."],
+["cien",1,"Quantos ossos tem o corpo de um adulto?","206","150","312","98","Bebês nascem com cerca de 270 a 300 peças ósseas. Muitas se fundem durante o crescimento, como as do crânio, até restarem 206."],
+/* ---- Literatura ---- */
+["lit",2,"Que romance de Machado de Assis é narrado por um defunto autor?","Memórias Póstumas de Brás Cubas","Dom Casmurro","Quincas Borba","Memorial de Aires","Publicado em 1881, o livro começa com o narrador já morto, que conta a própria vida com ironia e sem pressa. É um marco do realismo no Brasil."],
+["lit",1,"Quem escreveu Cem Anos de Solidão?","Gabriel García Márquez","Jorge Luis Borges","Mario Vargas Llosa","Julio Cortázar","Lançado em 1967, o romance acompanha várias gerações de uma família na cidade fictícia de Macondo. García Márquez ganhou o Nobel de Literatura em 1982."],
+["lit",1,"Em 1984, de George Orwell, como se chama o líder que tudo vigia?","Grande Irmão","Grande Pai","Líder Supremo","Camarada Napoleão","O livro saiu em 1949. Termos como “novilíngua” e “duplipensar” nasceram nele, e “Grande Irmão” virou sinônimo de vigilância."],
+["lit",1,"Quem escreveu Dom Quixote?","Miguel de Cervantes","Lope de Vega","Luís de Camões","Calderón de la Barca","A obra saiu em duas partes, em 1605 e 1615. Muita gente a considera o primeiro romance moderno."],
+["lit",2,"Os Lusíadas, de Camões, narram a viagem de qual navegador?","Vasco da Gama","Pedro Álvares Cabral","Fernão de Magalhães","Bartolomeu Dias","O poema épico de 1572 conta a viagem de Vasco da Gama à Índia, em 1498, e a história de Portugal. Camões havia perdido a visão de um olho em combate, em Ceuta."],
+["lit",1,"Quem escreveu Orgulho e Preconceito?","Jane Austen","Charlotte Brontë","Mary Shelley","George Eliot","Saiu em 1813 sem o nome dela na capa. Austen publicou seus romances em vida de forma anônima."],
+["lit",1,"Quem escreveu A Hora da Estrela?","Clarice Lispector","Cecília Meireles","Rachel de Queiroz","Lygia Fagundes Telles","Foi o último romance que Clarice publicou em vida, em 1977, ano de sua morte. Conta a história da datilógrafa nordestina Macabéa, pela voz do narrador Rodrigo S.M."],
+["lit",1,"Em que língua O Pequeno Príncipe foi escrito originalmente?","Francês","Inglês","Português","Alemão","Antoine de Saint-Exupéry o escreveu em francês, e o livro saiu primeiro em Nova York, em 1943. Hoje é um dos livros mais traduzidos do mundo."],
+["lit",1,"Na Odisseia, que herói tenta voltar para casa depois da Guerra de Troia?","Ulisses","Aquiles","Heitor","Eneias","Ulisses, ou Odisseu em grego, leva dez anos para voltar a Ítaca, tanto quanto durou a guerra. Os poemas de Homero foram transmitidos oralmente por gerações antes de serem postos por escrito."],
+["lit",2,"Quem escreveu Grande Sertão: Veredas?","João Guimarães Rosa","Graciliano Ramos","Jorge Amado","José de Alencar","Publicado em 1956, é quase um longo monólogo do jagunço Riobaldo. Rosa inventava palavras e misturava o falar sertanejo com construções eruditas."],
+["lit",1,"Quem criou o detetive Sherlock Holmes?","Arthur Conan Doyle","Agatha Christie","Edgar Allan Poe","G. K. Chesterton","Holmes estreou em 1887. Doyle chegou a matar o personagem em 1893, mas anos depois o ressuscitou, pressionado pelos leitores."],
+["lit",1,"Quem escreveu Frankenstein?","Mary Shelley","Bram Stoker","Emily Brontë","Jane Austen","O romance nasceu de um desafio de contar histórias de terror, numa temporada na Suíça em 1816, com Lord Byron e Percy Shelley. Mary tinha 18 anos quando começou a escrevê-lo."],
+/* ---- Artes e música ---- */
+["arte",1,"Quem pintou A Noite Estrelada?","Vincent van Gogh","Claude Monet","Edvard Munch","Paul Gauguin","Van Gogh pintou a tela em 1889, durante uma internação voluntária num asilo em Saint-Rémy, no sul da França. Ela está hoje no MoMA, em Nova York."],
+["arte",1,"Quem pintou o teto da Capela Sistina?","Michelangelo","Rafael","Leonardo da Vinci","Botticelli","O trabalho levou cerca de quatro anos, de 1508 a 1512, por encomenda do papa Júlio II. Michelangelo se considerava mais escultor que pintor."],
+["arte",1,"Que compositor ficou surdo e ainda assim escreveu a Nona Sinfonia?","Ludwig van Beethoven","Wolfgang Amadeus Mozart","Johann Sebastian Bach","Johannes Brahms","A Nona estreou em 1824, quando ele já não ouvia a plateia. O tema do último movimento, a “Ode à Alegria”, é hoje o hino da União Europeia."],
+["arte",2,"Quem esculpiu O Pensador?","Auguste Rodin","Michelangelo","Donatello","Gian Lorenzo Bernini","A figura foi criada para encimar A Porta do Inferno, obra inspirada na Divina Comédia, e se chamava originalmente O Poeta."],
+["arte",1,"Que movimento artístico tem Salvador Dalí como um de seus maiores nomes?","Surrealismo","Cubismo","Impressionismo","Dadaísmo","Dalí pintou os relógios derretidos de A Persistência da Memória em 1931. Contava que a ideia veio de um queijo camembert derretendo ao sol."],
+["arte",1,"Quem pintou Guernica, em 1937?","Pablo Picasso","Salvador Dalí","Joan Miró","Francisco de Goya","Picasso pintou a tela para o pavilhão da Espanha na Exposição de Paris, em reação ao bombardeio da cidade basca de Guernica. Hoje ela está no museu Reina Sofía, em Madri."],
+["arte",2,"O que é um afresco?","Pintura feita sobre reboco ainda úmido","Gravura feita em placa de cobre","Pintura com cera aquecida","Escultura em argila cozida","Os pigmentos se fixam na parede conforme o reboco seca. A Última Ceia, de Leonardo, não é afresco de verdade: ele testou uma técnica sobre parede seca, e a pintura começou a se deteriorar em poucas décadas."],
+["arte",1,"Qual canção de Tom Jobim e Vinicius de Moraes virou sucesso mundial na voz de Astrud Gilberto, em 1964?","Garota de Ipanema","Chega de Saudade","Aquarela do Brasil","Águas de Março","Foi gravada no álbum Getz/Gilberto, com João Gilberto e o saxofonista Stan Getz. É uma das canções mais gravadas do mundo."],
+["arte",1,"Quem compôs As Quatro Estações?","Antonio Vivaldi","Johann Sebastian Bach","Georg Friedrich Händel","Arcangelo Corelli","São quatro concertos para violino publicados em 1725. Cada um vem com um soneto que descreve cenas da estação, como tempestades de verão e a caça no outono."],
+["arte",2,"Que diretor fazia uma breve aparição em quase todos os próprios filmes?","Alfred Hitchcock","Stanley Kubrick","Orson Welles","Billy Wilder","Em Psicose, Hitchcock aparece do lado de fora da imobiliária, de chapéu de cowboy. Em Janela Indiscreta, está dando corda num relógio no apartamento do compositor."],
+["arte",1,"Quem pintou O Grito?","Edvard Munch","Gustav Klimt","Egon Schiele","Wassily Kandinsky","Existem várias versões, entre pinturas, pastéis e uma litografia. A primeira é de 1893, e Munch dizia ter sentido um grito infinito atravessando a natureza durante um entardecer."],
+["arte",2,"Quem compôs a ópera A Flauta Mágica?","Wolfgang Amadeus Mozart","Giuseppe Verdi","Richard Wagner","Gioachino Rossini","Estreou em Viena, em setembro de 1791, poucos meses antes da morte de Mozart. É um singspiel, ópera cantada em alemão com partes faladas."],
+/* ---- Geografia ---- */
+["geo",1,"Qual é o maior país do mundo em área?","Rússia","Canadá","China","Estados Unidos","São mais de 17 milhões de km², espalhados por 11 fusos horários."],
+["geo",1,"Qual é o menor país do mundo em área?","Vaticano","Mônaco","San Marino","Liechtenstein","O Vaticano tem menos de meio quilômetro quadrado, área menor que a de muitos parques urbanos. O governante é o papa, escolhido por votação dos cardeais."],
+["geo",1,"Qual é o maior deserto quente do mundo?","Saara","Gobi","Atacama","Arábia","O Saara tem cerca de 9 milhões de km², área maior que a do Brasil. O maior deserto de todos, porém, é a Antártida, um deserto de gelo que recebe pouquíssima precipitação."],
+["geo",1,"Em que cordilheira fica o Monte Everest?","Himalaia","Andes","Alpes","Cáucaso","O Everest tem cerca de 8.849 m e continua a subir alguns milímetros por ano, empurrado pela colisão entre as placas indiana e eurasiática."],
+["geo",3,"Que país tem o maior número de línguas faladas?","Papua-Nova Guiné","Índia","Estados Unidos","Indonésia","São cerca de 840 línguas vivas, muitas faladas por apenas algumas centenas de pessoas. O relevo montanhoso isolou comunidades por milênios."],
+["geo",2,"Qual é a capital da Austrália?","Canberra","Sydney","Melbourne","Perth","A cidade foi planejada do zero, como solução de compromisso entre as rivais Sydney e Melbourne. O projeto vencedor foi do casal de arquitetos americanos Walter Burley Griffin e Marion Mahony Griffin."],
+["geo",2,"Entre quais países fica o Lago Titicaca?","Peru e Bolívia","Chile e Argentina","Equador e Colômbia","Bolívia e Paraguai","Está a cerca de 3.800 m de altitude, entre os lagos navegáveis mais altos do mundo."],
+["geo",3,"Que país tem o maior número de ilhas do mundo?","Suécia","Indonésia","Filipinas","Canadá","Pelas contagens oficiais, a Suécia tem mais de 260 mil ilhas, quase todas pequenas e desabitadas. A Indonésia, o país de ilhas mais lembrado, tem cerca de 17 mil."],
+["geo",2,"Que dois mares o Canal de Suez liga?","Mediterrâneo e Vermelho","Negro e Cáspio","Báltico e do Norte","Adriático e Egeu","Inaugurado em 1869, ele evita que os navios contornem a África e encurta em milhares de quilômetros a rota entre a Europa e a Ásia."],
+["geo",1,"Qual grande cidade fica em dois continentes?","Istambul","Moscou","Cairo","Atenas","Istambul se estende pelas duas margens do estreito de Bósforo, na Europa e na Ásia. Já se chamou Bizâncio e Constantinopla."],
+["geo",1,"Que país ocupa sozinho um continente inteiro, pela divisão mais usada?","Austrália","Islândia","Madagascar","Nova Zelândia","Na divisão tradicional, a Austrália é país e continente ao mesmo tempo. A Antártida também é continente, mas não pertence a país algum."],
+["geo",1,"Onde fica o ponto mais profundo dos oceanos?","Fossa das Marianas","Fossa de Porto Rico","Fossa de Java","Fossa do Peru-Chile","O fundo da Fossa das Marianas, no Pacífico, está a cerca de 10.900 metros. Se o Everest fosse colocado ali, o topo ainda ficaria mais de 2 km abaixo da superfície."],
+/* ---- Filosofia ---- */
+["fil",1,"Quem é associado à frase “Só sei que nada sei”?","Sócrates","Platão","Aristóteles","Epicuro","Sócrates não deixou nada escrito. Conhecemos suas ideias sobretudo pelos diálogos de Platão, e a frase é um resumo do que ele diz na Apologia de Sócrates."],
+["fil",2,"Quem escreveu Crítica da Razão Pura, de 1781?","Immanuel Kant","Georg Hegel","René Descartes","David Hume","Kant dizia que a leitura de Hume o despertou do “sono dogmático”. A obra investiga o que a razão humana pode e o que não pode conhecer."],
+["fil",1,"De que filósofo é a frase “Penso, logo existo”?","René Descartes","Baruch Spinoza","Blaise Pascal","John Locke","Aparece em francês no Discurso do Método, de 1637. A versão em latim, cogito, ergo sum, vem dos Princípios da Filosofia, de 1644."],
+["fil",1,"Quem escreveu O Príncipe?","Nicolau Maquiavel","Jean-Jacques Rousseau","Thomas More","Montesquieu","Escrito em 1513, só foi publicado em 1532, depois da morte do autor. “Maquiavélico” virou sinônimo de manipulador, mas o livro é sobretudo um tratado realista sobre como conquistar e manter o poder."],
+["fil",2,"Quem escreveu O Segundo Sexo, de 1949?","Simone de Beauvoir","Hannah Arendt","Virginia Woolf","Judith Butler","Para Beauvoir, ninguém nasce mulher: torna-se mulher. Ela via boa parte do que se espera das mulheres como construção da sociedade."],
+["fil",1,"Em que obra de Platão aparece o mito da caverna?","A República","O Banquete","Apologia de Sócrates","Fédon","Prisioneiros acorrentados só enxergam sombras na parede e tomam as sombras por realidade. A alegoria fala de educação e da dificuldade de sair da ignorância."],
+["fil",2,"Que escola filosófica ensinava a aceitar o que não depende de nós e agir com virtude?","Estoicismo","Epicurismo","Cinismo","Ceticismo","Entre os estoicos estão Sêneca, Epicteto e o imperador Marco Aurélio, cujas Meditações eram anotações pessoais, provavelmente nunca pensadas para publicação."],
+["fil",1,"Qual filósofo escreveu Assim Falou Zaratustra?","Friedrich Nietzsche","Arthur Schopenhauer","Martin Heidegger","Karl Marx","Publicado entre 1883 e 1885, o livro mistura filosofia e narrativa poética e apresenta a ideia do “além-do-homem”."],
+["fil",2,"Que corrente ética defende a ação que traz a maior felicidade ao maior número de pessoas?","Utilitarismo","Existencialismo","Estoicismo","Niilismo","Foi desenvolvida por Jeremy Bentham e John Stuart Mill. O corpo de Bentham, preservado a seu pedido, ainda fica exposto num armário na University College London."],
+["fil",2,"O que diz a navalha de Ockham?","Entre explicações rivais, prefira a que pressupõe menos coisas","A verdade costuma ser a explicação mais complicada","Só existe o que pode ser visto a olho nu","Toda ação gera uma reação de mesma intensidade","Atribuída ao frade franciscano Guilherme de Ockham, do século XIV, ela serve de critério prático: não acrescente suposições sem necessidade. Isso não garante que a explicação mais simples esteja certa."],
+["fil",2,"Quem foi o mestre de Alexandre, o Grande?","Aristóteles","Platão","Sócrates","Diógenes","O rei Filipe II da Macedônia chamou Aristóteles por volta de 343 a.C. para educar o filho. Depois, Aristóteles voltou a Atenas e fundou o Liceu."],
+["fil",2,"Em qual obra de 1651 Thomas Hobbes defende um soberano forte para evitar a guerra de todos contra todos?","Leviatã","Utopia","O Contrato Social","Ética","Hobbes escreveu durante a Guerra Civil Inglesa. Para ele, sem um Estado forte a vida humana seria “solitária, pobre, sórdida, brutal e curta”."],
+/* ---- Psicologia ---- */
+["psi",2,"Quem fundou o primeiro laboratório de psicologia experimental, em Leipzig, em 1879?","Wilhelm Wundt","William James","Sigmund Freud","Ivan Pavlov","A data costuma ser usada como marco do nascimento da psicologia como ciência, separada da filosofia. Wundt estudava a experiência consciente com uma introspecção rigorosamente controlada."],
+["psi",1,"Que processo Pavlov estudou ao fazer cães salivarem diante de um sinal neutro, como um som?","Condicionamento clássico","Condicionamento operante","Aprendizagem por insight","Modelagem","Pavlov era fisiologista e ganhou o Nobel de Fisiologia ou Medicina em 1904, por pesquisas sobre a digestão. A salivação diante do sinal foi um achado inesperado desse trabalho."],
+["psi",2,"No condicionamento operante, de Skinner, o que torna mais provável que um comportamento se repita?","Ser seguido por uma consequência reforçadora","Ser precedido por um estímulo incondicionado","Ser explicado por um conflito inconsciente","Ser observado por outras pessoas","Reforço negativo não é punição: ele retira algo desagradável e, por isso, também aumenta a chance de o comportamento voltar. Skinner estudava isso com pombos e ratos na caixa que leva seu nome."],
+["psi",1,"O que o experimento de Milgram, dos anos 1960, investigou?","Até onde pessoas comuns obedecem a uma autoridade","A influência do grupo sobre o julgamento de cada um","O efeito de papéis sociais numa prisão simulada","A omissão de ajuda quando há muitas testemunhas","Diante de choques supostamente crescentes, cerca de dois terços dos participantes foram até o nível máximo. Os choques eram falsos e o “aprendiz” era um ator."],
+["psi",2,"Qual é a ordem dos estágios do desenvolvimento cognitivo segundo Piaget?","Sensório-motor, pré-operatório, operatório concreto, operatório formal","Pré-operatório, sensório-motor, operatório formal, operatório concreto","Sensório-motor, operatório concreto, pré-operatório, operatório formal","Operatório concreto, sensório-motor, pré-operatório, operatório formal","Piaget via a criança como alguém que constrói ativamente o conhecimento. Os estágios correspondem, de modo aproximado, a 0 a 2 anos, 2 a 7, 7 a 11 e a partir dos 11 ou 12."],
+["psi",2,"Quem criou a terapia cognitiva, base da TCC, nos anos 1960?","Aaron Beck","Albert Ellis","Carl Rogers","B. F. Skinner","Beck era psiquiatra de formação psicanalítica e notou que pacientes deprimidos tinham pensamentos automáticos negativos sobre si, o mundo e o futuro. Pouco antes, nos anos 1950, Albert Ellis havia criado a terapia racional-emotiva. A filha de Beck, Judith, é hoje uma das principais referências em TCC."],
+["psi",1,"Na hierarquia das necessidades de Maslow, qual grupo fica na base?","Fisiológicas","Segurança","Pertencimento","Autorrealização","A base reúne fome, sede, sono e outras necessidades do corpo. A famosa pirâmide, na verdade, não foi desenhada por Maslow: foi popularizada depois, em livros de administração."],
+["psi",1,"O que é o viés de confirmação?","Buscar e valorizar o que confirma o que já pensamos","Lembrar melhor os primeiros itens de uma lista","Superestimar a chance de eventos raros e marcantes","Acreditar que o grupo sempre tem razão","Ele afeta até cientistas, e é um dos motivos pelos quais estudos usam grupo de controle e métodos duplo-cegos."],
+["neuro",2,"Que estrutura do cérebro é mais associada à formação de novas memórias, como mostrou o caso do paciente H.M.?","Hipocampo","Cerebelo","Amígdala","Bulbo","Em 1953, Henry Molaison teve partes dos lobos temporais, incluindo o hipocampo, retiradas para controlar uma epilepsia grave. Perdeu a capacidade de formar novas memórias de eventos, mas aprendia habilidades motoras sem lembrar de tê-las praticado."],
+["psi",2,"Em que área o psicólogo Daniel Kahneman ganhou o Nobel, em 2002?","Economia","Medicina","Paz","Literatura","Com Amos Tversky, ele mostrou como atalhos mentais levam a erros de julgamento previsíveis. Tversky havia morrido em 1996 e não pôde receber o prêmio. O livro Rápido e Devagar resume essas ideias para o grande público."],
+["psi",1,"Quais são as três instâncias do aparelho psíquico na teoria estrutural de Freud?","Id, ego e superego","Consciente, pré-consciente e inconsciente","Persona, sombra e self","Anima, animus e self","Freud as apresentou em 1923, em O Ego e o Id. Consciente, pré-consciente e inconsciente formam a tópica anterior, de uns vinte anos antes."],
+["psi",2,"O que os experimentos de Harry Harlow com macacos-rhesus mostraram sobre o apego?","Preferiam a mãe de pano, macia, à de arame que dava leite","Preferiam a mãe de arame, porque ela dava o leite","Não mostravam preferência entre os dois tipos de mãe","Preferiam ficar sozinhos no canto da jaula","O contato e o conforto pesam tanto quanto a comida na formação do vínculo. Hoje esses estudos são vistos como eticamente inaceitáveis, mas dialogam com a teoria do apego de John Bowlby."],
+
+/* ======== fichas acrescentadas na segunda edição do acervo ======== */
+/* ---- História ---- */
+["hist",1,"Em que ano Cristóvão Colombo chegou à América?","1492","1500","1453","1519","Colombo morreu convencido de ter chegado à Ásia. O nome América homenageia outro navegador, o florentino Américo Vespúcio, que defendeu se tratar de um novo continente."],
+["hist",1,"Qual é a única das Sete Maravilhas do Mundo Antigo que ainda está de pé?","A Grande Pirâmide de Gizé","O Colosso de Rodes","O Farol de Alexandria","Os Jardins Suspensos da Babilônia","Construída por volta de 2560 a.C. para o faraó Quéops, foi a estrutura mais alta feita pelo ser humano durante cerca de 3.800 anos."],
+["hist",1,"Em que ano terminou a Segunda Guerra Mundial?","1945","1918","1939","1950","Na Europa, a guerra acabou em maio de 1945. No Pacífico, o Japão assinou a rendição em 2 de setembro, semanas depois das bombas de Hiroshima e Nagasaki."],
+["hist",1,"Que acontecimento de 14 de julho de 1789 virou símbolo do início da Revolução Francesa?","A queda da Bastilha","A execução de Luís XVI","A coroação de Napoleão","A Batalha de Waterloo","A multidão tomou a fortaleza-prisão de Paris, que naquele dia tinha só sete presos. A data é hoje a festa nacional da França."],
+["hist",1,"Que líder sul-africano passou 27 anos preso antes de se tornar presidente do país?","Nelson Mandela","Desmond Tutu","Steve Biko","Thabo Mbeki","Libertado em 1990, Mandela dividiu o Nobel da Paz de 1993 com Frederik de Klerk e venceu, em 1994, as primeiras eleições abertas a todos os sul-africanos."],
+["hist",1,"Que cidade romana foi soterrada pela erupção do Vesúvio, em 79 d.C.?","Pompeia","Cartago","Siracusa","Ravena","As cinzas preservaram casas, pinturas e até pães carbonizados. Os famosos moldes de gesso das vítimas foram feitos enchendo os vazios que os corpos deixaram na cinza endurecida."],
+["hist",2,"Qual foi o maior império de território contínuo da história?","Mongol","Romano","Otomano","Persa","No fim do século XIII, ia da Coreia ao Leste Europeu. Só o Império Britânico, espalhado por vários continentes, chegou a ocupar área maior."],
+["hist",2,"De que faraó era o túmulo quase intacto encontrado por Howard Carter em 1922?","Tutancâmon","Ramsés II","Quéops","Akhenaton","Tutancâmon reinou pouco e morreu jovem, por volta dos 19 anos. A fama vem do túmulo, com mais de 5 mil objetos, entre eles a célebre máscara de ouro."],
+["hist",3,"Que faraó, uma mulher do século XV a.C., costumava ser representada com barba postiça?","Hatshepsut","Nefertiti","Cleópatra","Nefertari","Ela governou o Egito por cerca de duas décadas. Depois de sua morte, muitas de suas imagens foram destruídas ou apagadas dos monumentos."],
+["hist",3,"Que acordos de 1648 encerraram a Guerra dos Trinta Anos e são vistos como origem do sistema de Estados soberanos?","Paz de Vestfália","Tratado de Versalhes","Congresso de Viena","Paz de Utrecht","Os tratados, assinados nas cidades de Osnabrück e Münster, reconheceram a autoridade de cada Estado sobre seu território, princípio que ainda organiza a diplomacia."],
+["hist",3,"Que império da África Ocidental foi governado por Mansa Musa, um dos homens mais ricos da história?","Império do Mali","Império de Gana","Reino de Axum","Império Songai","Na peregrinação a Meca, em 1324, ele gastou e doou tanto ouro no Cairo que o valor do metal caiu na região por anos."],
+["hist",3,"Que imperador indiano se converteu ao budismo depois da sangrenta guerra de Kalinga?","Ashoka","Akbar","Chandragupta","Shah Jahan","Seus éditos, gravados em rochas e colunas, pregavam tolerância e não violência. O capitel dos leões de uma dessas colunas é hoje o emblema oficial da Índia."],
+/* ---- Brasil ---- */
+["br",1,"Que tratado de 1494 dividiu as terras do Novo Mundo entre Portugal e Espanha?","Tratado de Tordesilhas","Tratado de Madri","Tratado de Methuen","Tratado de Utrecht","A linha imaginária passava 370 léguas a oeste de Cabo Verde. A expansão dos bandeirantes empurrou a fronteira, e o Tratado de Madri, de 1750, redesenhou os limites."],
+["br",1,"Que plano econômico de 1994 criou a moeda atual e derrubou a hiperinflação?","Plano Real","Plano Cruzado","Plano Collor","Plano Verão","Antes da nova moeda, os preços passaram por uma unidade de transição, a URV. Em 1993, a inflação tinha passado de 2.400% no ano."],
+["br",1,"Que conspiração de 1789, em Minas Gerais, teve Tiradentes como figura mais conhecida?","Inconfidência Mineira","Conjuração Baiana","Guerra dos Emboabas","Revolta de Vila Rica","Os conspiradores foram denunciados antes de agir. Tiradentes foi o único executado, em 21 de abril de 1792, data que hoje é feriado nacional."],
+["br",2,"Em que ano a família real portuguesa chegou ao Brasil, fugindo das tropas de Napoleão?","1808","1822","1792","1815","Com a corte vieram milhares de pessoas. Dom João abriu os portos às nações amigas e criou instituições como o Banco do Brasil e o Jardim Botânico do Rio de Janeiro."],
+["br",2,"Que revolta, entre 1835 e 1845, proclamou uma república no Rio Grande do Sul?","Revolução Farroupilha","Revolução Praieira","Confederação do Equador","Revolta dos Malês","Foi a mais longa revolta do período imperial. O italiano Giuseppe Garibaldi lutou ao lado dos farrapos e conheceu ali Anita, que se tornaria sua companheira de batalhas."],
+["br",2,"Em que ano o Código Eleitoral garantiu o voto feminino em todo o Brasil?","1932","1889","1946","1988","Antes disso, uma lei do Rio Grande do Norte já havia permitido que mulheres votassem, em 1927. Em 1933, Carlota Pereira de Queirós se tornou a primeira deputada federal do país."],
+["br",2,"Que ciclo econômico financiou a construção do Teatro Amazonas, inaugurado em Manaus em 1896?","Ciclo da borracha","Ciclo do ouro","Ciclo do café","Ciclo do açúcar","O látex da seringueira fez de Manaus uma das cidades mais ricas do país. O ciclo entrou em colapso quando a borracha plantada na Ásia, a partir de sementes levadas da Amazônia, passou a dominar o mercado."],
+["br",2,"Como se chamou a aliança entre Brasil, Argentina e Uruguai na guerra contra o Paraguai, iniciada em 1864?","Tríplice Aliança","Tríplice Entente","Pacto ABC","Santa Aliança","Foi o conflito mais sangrento da história da América do Sul. As estimativas da perda populacional do Paraguai variam muito, mas todas indicam uma catástrofe demográfica."],
+["br",3,"Quem compôs a música do Hino Nacional Brasileiro?","Francisco Manuel da Silva","Carlos Gomes","Heitor Villa-Lobos","Chiquinha Gonzaga","A melodia é de 1831. A letra atual, de Joaquim Osório Duque Estrada, só foi oficializada em 1922, no centenário da Independência."],
+["br",3,"Quem liderou a Revolta da Chibata, em 1910?","João Cândido","Luís Carlos Prestes","Antônio Conselheiro","Marcílio Dias","Chamado de Almirante Negro, João Cândido comandou marinheiros que tomaram navios de guerra na baía de Guanabara para exigir o fim dos castigos físicos. Depois, muitos revoltosos foram presos, e vários morreram numa cela da Ilha das Cobras."],
+["br",3,"Em que estado foi encontrada Luzia, um dos esqueletos humanos mais antigos das Américas?","Minas Gerais","Piauí","Mato Grosso","São Paulo","Ela viveu há mais de 11 mil anos na região de Lagoa Santa. Seu crânio estava no Museu Nacional, no Rio, e foi recuperado em fragmentos depois do incêndio de 2018."],
+["br",3,"Que atual estado brasileiro foi incorporado pelo Tratado de Petrópolis, assinado com a Bolívia em 1903?","Acre","Rondônia","Roraima","Amapá","A região era ocupada por seringueiros brasileiros. O Brasil pagou 2 milhões de libras esterlinas e se comprometeu a construir a ferrovia Madeira-Mamoré."],
+/* ---- Ciências ---- */
+["cien",1,"Qual planeta é conhecido como Planeta Vermelho?","Marte","Júpiter","Vênus","Saturno","A cor vem do óxido de ferro, a ferrugem, na poeira da superfície. Marte também abriga o Monte Olimpo, o maior vulcão conhecido do Sistema Solar, com mais de 20 km de altura."],
+["cien",1,"Qual é, aproximadamente, a velocidade da luz no vácuo?","300 mil km por segundo","300 km por segundo","30 mil km por segundo","3 milhões de km por segundo","O valor exato é 299.792.458 metros por segundo. Ele foi fixado por definição em 1983, quando o metro passou a ser definido a partir da velocidade da luz."],
+["cien",1,"Que órgão do corpo produz a insulina?","Pâncreas","Fígado","Baço","Rim","A insulina foi isolada em 1921, em Toronto, por Frederick Banting e Charles Best. Antes disso, o diabetes tipo 1 era quase sempre fatal."],
+["cien",1,"Que gás as plantas liberam na fotossíntese?","Oxigênio","Gás carbônico","Nitrogênio","Metano","Esse oxigênio vem da quebra das moléculas de água, como mostraram experimentos com isótopos nos anos 1940. As plantas absorvem o gás carbônico e usam seu carbono para fabricar açúcares."],
+["cien",2,"Quem publicou, em 1869, a tabela periódica que deixava lacunas para elementos ainda desconhecidos?","Dmitri Mendeleiev","Antoine Lavoisier","John Dalton","Niels Bohr","Ele previu com boa precisão as propriedades de elementos que só seriam descobertos depois, como o gálio e o germânio. O elemento 101 recebeu o nome mendelévio em sua homenagem."],
+["cien",2,"Que forma tem a molécula de DNA, descrita em 1953?","Dupla hélice","Esfera oca","Fita simples e reta","Cubo cristalino","Watson e Crick chegaram ao modelo com a ajuda de imagens de difração de raios X feitas por Rosalind Franklin, como a Foto 51, que lhes foram mostradas sem o conhecimento dela."],
+["cien",2,"Quantos cromossomos há em uma célula humana comum?","46","23","48","64","São 23 pares. Por décadas se acreditou que eram 48; a contagem correta só foi estabelecida em 1956. A síndrome de Down é causada por uma cópia extra do cromossomo 21."],
+["cien",2,"Em que camada da atmosfera está a maior parte do ozônio?","Estratosfera","Troposfera","Mesosfera","Termosfera","Essa camada filtra boa parte da radiação ultravioleta. O buraco sobre a Antártida, causado por gases como os CFCs, vem se recuperando desde o Protocolo de Montreal, de 1987."],
+["cien",3,"Que cientista propôs, em 1912, a teoria da deriva continental?","Alfred Wegener","Charles Lyell","James Hutton","Alexander von Humboldt","Ele notou como os litorais da América do Sul e da África se encaixam e encontrou fósseis iguais dos dois lados do Atlântico. A ideia só foi aceita nos anos 1960, com a tectônica de placas."],
+["cien",3,"Em 1919, observações de um eclipse em Sobral, no Ceará, ajudaram a confirmar qual teoria?","Relatividade geral","Seleção natural","Mecânica quântica","Big Bang","Astrônomos britânicos mediram ali, com apoio do Observatório Nacional, e na ilha de Príncipe, na África, o desvio da luz das estrelas pelo Sol, previsto por Einstein. Em visita ao país, em 1925, ele escreveu que a questão formulada por sua mente tinha sido respondida pelo céu do Brasil."],
+["cien",3,"Que organela tem DNA próprio, herdado quase sempre apenas da mãe?","Mitocôndria","Ribossomo","Complexo de Golgi","Lisossomo","Pela teoria endossimbiótica, defendida por Lynn Margulis, as mitocôndrias descendem de bactérias que passaram a viver dentro de outras células há mais de um bilhão de anos."],
+["cien",3,"A que temperatura, aproximadamente, a água ferve no topo do Everest?","Cerca de 70 °C","Cerca de 100 °C","Cerca de 120 °C","Cerca de 40 °C","Lá em cima a pressão do ar é cerca de um terço da do nível do mar, e a água ferve com menos energia. Por isso cozinhar macarrão ou batata no alto da montanha demora muito mais."],
+/* ---- Literatura ---- */
+["lit",1,"Quem escreveu Romeu e Julieta?","William Shakespeare","Christopher Marlowe","Charles Dickens","Lord Byron","A trama vem de narrativas italianas mais antigas. Shakespeare situou a história em Verona, e a cidade até hoje recebe cartas endereçadas a Julieta, respondidas por voluntários."],
+["lit",1,"Que poeta mineiro escreveu o poema No Meio do Caminho, sobre uma pedra no caminho?","Carlos Drummond de Andrade","Manuel Bandeira","Cecília Meireles","Vinicius de Moraes","Publicado em 1928, o poema foi ridicularizado por muitos leitores. Décadas depois, Drummond reuniu as críticas e paródias num livro sobre a trajetória do próprio poema."],
+["lit",1,"Quem escreveu A Metamorfose, em que Gregor Samsa acorda transformado num inseto monstruoso?","Franz Kafka","Albert Camus","Hermann Hesse","Thomas Mann","Kafka pediu ao amigo Max Brod que queimasse seus manuscritos depois de sua morte. Brod desobedeceu e publicou romances como O Processo e O Castelo."],
+["lit",2,"Em Moby Dick, como se chama o capitão obcecado pela baleia branca?","Ahab","Nemo","Queequeg","Ishmael","Herman Melville publicou o livro em 1851 e vendeu poucos exemplares em vida. Só no século XX ele passou a ser visto como um dos grandes romances americanos."],
+["lit",2,"Quem guia Dante pelo Inferno e pelo Purgatório na Divina Comédia?","Virgílio","Homero","Beatriz","Ovídio","O poeta romano, autor da Eneida, conduz Dante até o alto do Purgatório, onde Beatriz assume o papel de guia. Dante escreveu em toscano, e isso ajudou a fixar o italiano como língua literária."],
+["lit",2,"Quem escreveu Vidas Secas?","Graciliano Ramos","Rachel de Queiroz","José Lins do Rego","Jorge Amado","O romance de 1938 acompanha Fabiano e sua família de retirantes pelo sertão. A cachorra Baleia é uma das personagens mais lembradas da literatura brasileira."],
+["lit",2,"Que romance de Dostoiévski acompanha o estudante Raskólnikov depois de um assassinato?","Crime e Castigo","Os Irmãos Karamázov","O Idiota","Memórias do Subsolo","Publicado em 1866, o livro acompanha a culpa e a paranoia do personagem. No mesmo ano, pressionado por dívidas e prazos, Dostoiévski ditou O Jogador em menos de um mês à estenógrafa Anna, com quem se casaria."],
+["lit",2,"Quem escreveu Macunaíma, o herói sem nenhum caráter?","Mário de Andrade","Oswald de Andrade","Monteiro Lobato","Menotti Del Picchia","Publicado em 1928, mistura lendas indígenas, folclore e fala popular. O próprio Mário chamou o livro de rapsódia."],
+["lit",3,"Quem escreveu Úrsula, de 1859, considerado por muitos o primeiro romance abolicionista do Brasil?","Maria Firmina dos Reis","Júlia Lopes de Almeida","Nísia Floresta","Francisca Júlia","Maranhense, ela assinou o livro apenas como Uma Maranhense. Também foi a primeira mulher aprovada em concurso público para professora no Maranhão."],
+["lit",3,"Que obra japonesa do século XI, escrita por Murasaki Shikibu, é vista como um dos primeiros romances do mundo?","O Conto de Genji","O Livro do Travesseiro","Os Contos de Heike","Hojoki","Murasaki era uma dama da corte de Heian. O livro acompanha a vida e os amores do príncipe Genji ao longo de 54 capítulos."],
+["lit",3,"Qual era o nome verdadeiro de George Orwell?","Eric Arthur Blair","Samuel Clemens","Hector Hugh Munro","Mary Ann Evans","Ele adotou o pseudônimo em 1933, no lançamento de seu primeiro livro, Na Pior em Paris e Londres. Samuel Clemens era Mark Twain, e Mary Ann Evans, George Eliot."],
+["lit",3,"Qual heterônimo de Fernando Pessoa é tratado como mestre pelos outros?","Alberto Caeiro","Álvaro de Campos","Ricardo Reis","Bernardo Soares","Caeiro, o poeta da natureza e das sensações, é chamado de mestre por Álvaro de Campos, por Ricardo Reis e pelo próprio Pessoa. Bernardo Soares, do Livro do Desassossego, é considerado um semi-heterônimo."],
+/* ---- Artes e música ---- */
+["arte",1,"Em que museu está a Mona Lisa?","Louvre","Prado","Uffizi","Museu Britânico","O quadro ficou mundialmente famoso depois de ser roubado em 1911 por Vincenzo Peruggia, um italiano que havia trabalhado no museu. Foi recuperado dois anos depois, em Florença."],
+["arte",1,"Que movimento artístico teve Claude Monet entre seus fundadores?","Impressionismo","Expressionismo","Cubismo","Barroco","O nome nasceu de uma crítica irônica ao quadro Impressão, Sol Nascente, de 1872, exibido na primeira exposição do grupo, em 1874."],
+["arte",1,"Pelo Telefone, registrada em 1916, costuma ser citada como o primeiro disco de qual gênero?","Samba","Choro","Frevo","Baião","Registrada por Donga e sucesso no Carnaval de 1917, nasceu em rodas como as da casa de Tia Ciata, no Rio. Muitos estudiosos apontam que ela ainda soava próxima do maxixe."],
+["arte",1,"Que artista ficou conhecido como o Rei do Baião?","Luiz Gonzaga","Jackson do Pandeiro","Dominguinhos","Gilberto Gil","Com a sanfona, o chapéu de couro e sucessos como Asa Branca, de 1947, levou a música do Nordeste para o país inteiro."],
+["arte",2,"Que pintor brasileiro fez os painéis Guerra e Paz, na sede da ONU, em Nova York?","Cândido Portinari","Di Cavalcanti","Alfredo Volpi","Lasar Segall","Cada painel tem cerca de 14 metros de altura. Portinari não foi à entrega, em 1957: por ter sido filiado ao Partido Comunista, não obteve o visto americano."],
+["arte",2,"Quem dirigiu o filme Cidade de Deus, de 2002, com Kátia Lund?","Fernando Meirelles","Walter Salles","José Padilha","Glauber Rocha","Baseado no livro de Paulo Lins, o filme recebeu quatro indicações ao Oscar, inclusive a de melhor diretor."],
+["arte",2,"Que compositor brasileiro estreou a ópera O Guarani no Teatro alla Scala, em Milão, em 1870?","Carlos Gomes","Heitor Villa-Lobos","Chiquinha Gonzaga","Ernesto Nazareth","A ópera se baseia no romance de José de Alencar. A abertura ficou conhecida no Brasil como o tema do programa de rádio A Voz do Brasil."],
+["arte",2,"Quem compôs a música do balé O Lago dos Cisnes?","Piotr Tchaikovsky","Igor Stravinsky","Sergei Prokofiev","Nikolai Rimsky-Korsakov","A estreia, em 1877, no Teatro Bolshoi, teve recepção fria. O sucesso veio com a nova coreografia de Marius Petipa e Lev Ivanov, em 1895, depois da morte do compositor."],
+["arte",3,"De onde vêm os nomes das notas musicais ré, mi, fá, sol e lá?","Das sílabas iniciais dos versos de um hino em latim","Das iniciais de planetas conhecidos na Antiguidade","Dos nomes de santos da Igreja medieval","De abreviações de palavras gregas sobre o som","No século XI, o monge Guido d'Arezzo usou um hino a São João Batista para ensinar a cantar. A primeira nota, ut, depois virou dó, e o si veio das iniciais de Sancte Iohannes."],
+["arte",3,"Quem compôs 4′33″, peça em que o músico não toca nenhuma nota?","John Cage","Philip Glass","Steve Reich","Arnold Schoenberg","Estreada em 1952 pelo pianista David Tudor, a peça faz o público prestar atenção aos sons do ambiente, como tosses, cadeiras rangendo e o vento lá fora."],
+["arte",3,"Como se chama o mictório que Marcel Duchamp assinou como R. Mutt e enviou a uma exposição em 1917?","A Fonte","A Roda de Bicicleta","O Grande Vidro","Nu Descendo uma Escada","A peça não foi exposta, e o original se perdeu. As versões em museus são réplicas autorizadas por Duchamp nos anos 1960; a obra virou símbolo do ready-made, o objeto comum transformado em arte pela escolha do artista."],
+["arte",3,"Que cineasta soviético dirigiu O Encouraçado Potemkin, de 1925?","Sergei Eisenstein","Andrei Tarkovsky","Dziga Vertov","Vsevolod Pudovkin","A cena da escadaria de Odessa, com um carrinho de bebê descendo os degraus em meio ao massacre, foi homenageada por muitos filmes, como Os Intocáveis, de 1987."],
+/* ---- Geografia ---- */
+["geo",1,"Qual é o maior oceano do mundo?","Pacífico","Atlântico","Índico","Ártico","O Pacífico cobre cerca de um terço da superfície da Terra, área maior que a de todos os continentes somados."],
+["geo",1,"Qual é o maior rio do mundo em volume de água?","Amazonas","Nilo","Yangtzé","Mississippi","O Amazonas despeja no Atlântico cerca de um quinto de toda a água doce que os rios lançam nos oceanos. Se ele também é mais longo que o Nilo ainda é tema de disputa entre pesquisadores."],
+["geo",1,"Que país passou a China e se tornou o mais populoso do mundo em 2023, segundo a ONU?","Índia","Indonésia","Estados Unidos","Nigéria","A Índia passou de 1,4 bilhão de habitantes, enquanto a população da China começou a diminuir."],
+["geo",1,"Que linha imaginária divide a Terra em hemisférios Norte e Sul?","Linha do Equador","Trópico de Capricórnio","Meridiano de Greenwich","Círculo Polar Ártico","No Brasil, ela passa por Macapá, onde fica o monumento Marco Zero do Equador. Lá, o estádio Zerão tem a linha do meio de campo sobre o Equador, com um time em cada hemisfério."],
+["geo",1,"Que país é conhecido como Terra do Sol Nascente?","Japão","China","Coreia do Sul","Tailândia","O nome do país em japonês, Nihon ou Nippon, significa algo como origem do sol. A bandeira, um círculo vermelho sobre fundo branco, representa o sol."],
+["geo",2,"Qual é a capital do Canadá?","Ottawa","Toronto","Montreal","Vancouver","A cidade foi escolhida pela rainha Vitória em 1857, em parte por ficar na divisa entre as regiões de língua inglesa e francesa."],
+["geo",2,"Qual é a capital da Turquia?","Ancara","Istambul","Esmirna","Antália","Mustafa Kemal Atatürk transferiu a capital para Ancara em 1923, ano da fundação da República. Istambul segue como a maior cidade do país."],
+["geo",2,"Qual é a montanha mais alta das Américas?","Aconcágua","Denali","Chimborazo","Huascarán","Com quase 7 mil metros, fica na Argentina, perto da fronteira com o Chile. Já o cume do Chimborazo, no Equador, é o ponto da superfície mais distante do centro da Terra, por causa do achatamento do planeta."],
+["geo",2,"Qual é o deserto não polar mais seco do mundo?","Atacama","Saara","Gobi","Kalahari","Em algumas áreas do Atacama, no Chile, quase nunca se registrou chuva. A NASA usa a região para testar equipamentos de missões a Marte."],
+["geo",2,"Que rio europeu atravessa ou faz fronteira com dez países?","Danúbio","Reno","Volga","Sena","Ele passa por quatro capitais: Viena, Bratislava, Budapeste e Belgrado. Nasce na Floresta Negra, na Alemanha, e deságua no Mar Negro."],
+["geo",3,"Qual país tem o maior número de fusos horários, contando seus territórios?","França","Rússia","Estados Unidos","Reino Unido","Graças a territórios ultramarinos como a Polinésia Francesa, a Guiana Francesa e a Nova Caledônia, a França tem 12 fusos, ou 13 se contar sua área reivindicada na Antártida."],
+["geo",3,"Qual é o maior país do mundo sem saída para o mar?","Cazaquistão","Mongólia","Bolívia","Chade","O Cazaquistão é o nono maior país do mundo. A Bolívia perdeu seu litoral para o Chile na Guerra do Pacífico, no fim do século XIX, e ainda mantém uma marinha que opera no lago Titicaca."],
+/* ---- Filosofia ---- */
+["fil",1,"O que significa a palavra filosofia, de origem grega?","Amor à sabedoria","Ciência da verdade","Arte da palavra","Estudo da alma","Vem de philo, amizade ou amor, e sophia, sabedoria. A tradição atribui a Pitágoras o uso do termo para se apresentar como amigo da sabedoria, e não como sábio."],
+["fil",1,"Que discípulo de Sócrates fundou a Academia, em Atenas?","Platão","Aristóteles","Diógenes","Epicuro","Fundada por volta de 387 a.C., a Academia funcionou por séculos e deu nome às academias de hoje. Aristóteles estudou lá por cerca de vinte anos."],
+["fil",1,"Quem escreveu O Capital?","Karl Marx","Friedrich Engels","Adam Smith","Max Weber","O primeiro volume saiu em 1867. Os outros dois foram editados por Friedrich Engels depois da morte de Marx, a partir de seus manuscritos."],
+["fil",1,"De que país era o pensador Confúcio?","China","Japão","Índia","Coreia","Viveu entre os séculos VI e V a.C. Seus ensinamentos sobre ética, família e governo foram reunidos pelos discípulos nos Analectos."],
+["fil",1,"Que filósofo francês resumiu o existencialismo na ideia de que a existência precede a essência?","Jean-Paul Sartre","Albert Camus","Michel Foucault","Henri Bergson","Para Sartre, o ser humano não nasce com uma natureza pronta e se define pelas próprias escolhas. Em 1964, ele recusou o Nobel de Literatura."],
+["fil",1,"Que ramo da filosofia estuda o belo e a arte?","Estética","Ética","Lógica","Metafísica","O termo foi adotado nesse sentido pelo alemão Alexander Baumgarten, no século XVIII, a partir do grego aisthesis, sensação."],
+["fil",1,"Que pensador iluminista defendeu a separação dos poderes em Executivo, Legislativo e Judiciário?","Montesquieu","Voltaire","Jean-Jacques Rousseau","John Locke","A ideia está em O Espírito das Leis, de 1748, e inspirou constituições como a dos Estados Unidos e a do Brasil."],
+["fil",2,"Que filósofo grego disse que ninguém se banha duas vezes no mesmo rio?","Heráclito","Parmênides","Demócrito","Pitágoras","Para Heráclito, tudo está em constante mudança. Parmênides, que viveu na mesma época, defendia quase o oposto: a mudança seria ilusão dos sentidos."],
+["fil",3,"Para Tales de Mileto, tido como o primeiro filósofo do Ocidente, qual era o princípio de todas as coisas?","A água","O fogo","O ar","Os números","Tales também teria previsto um eclipse do Sol em 585 a.C. Depois dele, Anaxímenes apostou no ar, Heráclito no fogo e os pitagóricos nos números."],
+["fil",3,"Que filósofo propôs o véu da ignorância para pensar uma sociedade justa?","John Rawls","Robert Nozick","Jürgen Habermas","Isaiah Berlin","Em Uma Teoria da Justiça, de 1971, Rawls pede que imaginemos escolher as regras da sociedade sem saber que lugar ocuparíamos nela: rico ou pobre, saudável ou doente."],
+["fil",3,"Ao acompanhar o julgamento de qual nazista Hannah Arendt cunhou a expressão banalidade do mal?","Adolf Eichmann","Hermann Göring","Rudolf Hess","Josef Mengele","Em 1961, em Jerusalém, ela se impressionou com a figura comum de Eichmann, um burocrata que organizava deportações sem refletir sobre o que fazia. O livro Eichmann em Jerusalém saiu em 1963."],
+["fil",3,"Que filósofo grego criou o paradoxo de Aquiles e a tartaruga?","Zenão de Eleia","Parmênides","Anaximandro","Pitágoras","Pelo paradoxo, Aquiles nunca alcançaria a tartaruga, porque sempre teria de chegar antes ao ponto onde ela estava. Muito depois, a matemática das séries infinitas mostrou como uma soma de infinitos termos pode dar um resultado finito."],
+/* ---- Psicologia ---- */
+["psi",1,"Que psiquiatra suíço criou os conceitos de inconsciente coletivo e arquétipos?","Carl Gustav Jung","Alfred Adler","Sigmund Freud","Jean Piaget","Jung foi colaborador próximo de Freud até o rompimento, em 1913. Também popularizou os termos introversão e extroversão, usados até hoje."],
+["psi",1,"Nos testes de QI modernos, que valor corresponde à média da população?","100","50","150","200","Os testes são padronizados com média 100 e desvio-padrão de 15; cerca de dois terços das pessoas ficam entre 85 e 115. Ao longo do século XX, o desempenho bruto médio subiu, fenômeno chamado efeito Flynn."],
+["psi",1,"Que tipo de estímulo o teste de Rorschach apresenta?","Manchas de tinta","Fotos de rostos","Listas de palavras","Sequências de números","Hermann Rorschach publicou o teste em 1921, com dez pranchas. Morreu no ano seguinte, aos 37 anos."],
+["psi",1,"Que psicólogo criou a abordagem centrada na pessoa?","Carl Rogers","Abraham Maslow","Albert Bandura","Viktor Frankl","Rogers defendia que o terapeuta oferecesse empatia, aceitação incondicional e autenticidade. Também foi pioneiro em gravar sessões de terapia para pesquisa."],
+["psi",1,"Que sigla designa o manual de transtornos mentais da Associação Americana de Psiquiatria?","DSM","CID","MMPI","WAIS","A versão atual é o DSM-5-TR, de 2022. A Organização Mundial da Saúde publica a CID, cuja 11ª revisão entrou em vigor em 2022."],
+["psi",1,"Como se chama a melhora causada pela expectativa do paciente, mesmo sem substância ativa no tratamento?","Efeito placebo","Efeito halo","Efeito Pigmaleão","Efeito Hawthorne","O oposto também existe: no efeito nocebo, a expectativa de piora provoca sintomas reais. Por isso, testes de remédios comparam o grupo tratado com um grupo que recebe placebo."],
+["psi",1,"Nos experimentos de Solomon Asch, o que muitos participantes fizeram diante de um grupo que dava respostas obviamente erradas?","Concordaram com o grupo, mesmo vendo o erro","Corrigiram o grupo em todas as rodadas","Desistiram de continuar o experimento","Pediram ajuda ao pesquisador","A tarefa era comparar o comprimento de linhas. Cerca de um terço das respostas acompanhou o erro do grupo, e três em cada quatro participantes cederam ao menos uma vez."],
+["psi",2,"Que conceito de Vygotsky descreve a distância entre o que a criança faz sozinha e o que faz com ajuda?","Zona de desenvolvimento proximal","Estágio operatório concreto","Período crítico","Esquema cognitivo","Vygotsky morreu de tuberculose em 1934, aos 37 anos, e boa parte de sua obra só chegou ao Ocidente décadas depois."],
+["psi",2,"O que o experimento do boneco João Bobo, de Albert Bandura, mostrou?","Que crianças imitam a agressividade que observam em adultos","Que a agressividade é totalmente inata","Que punições eliminam qualquer agressividade","Que meninos e meninas agem sempre igual","Crianças que viram um adulto bater no boneco tendiam a repetir os golpes. O estudo, de 1961, ajudou a fundar a teoria da aprendizagem social."],
+["psi",3,"Pela lei de Yerkes-Dodson, que forma tem a relação entre nível de ativação e desempenho?","U invertido","Linha reta crescente","Linha reta decrescente","Curva exponencial","Um pouco de ativação melhora o desempenho, mas ativação demais o prejudica, sobretudo em tarefas complexas. O estudo original, de 1908, foi feito com camundongos."],
+["psi",3,"Quem propôs a teoria da dissonância cognitiva, em 1957?","Leon Festinger","Kurt Lewin","Fritz Heider","Solomon Asch","Antes, ele e colegas acompanharam por dentro um grupo que previa o fim do mundo. Quando a profecia falhou, os membros mais comprometidos passaram a acreditar ainda mais, caso narrado no livro Quando a Profecia Falha, de 1956."],
+["psi",3,"Que fenômeno Martin Seligman descreveu ao observar cães que, após choques inescapáveis, paravam de tentar fugir?","Desamparo aprendido","Extinção","Habituação","Dessensibilização","A ideia virou modelo para estudar a depressão. Décadas depois, Seligman e Steven Maier a revisaram: a passividade seria a reação padrão, e o que se aprende é a percepção de controle."],
+["psi",3,"Segundo o artigo clássico de George Miller, de 1956, quantos itens a memória de curto prazo comporta?","Cerca de sete, mais ou menos dois","Cerca de vinte, mais ou menos cinco","Exatamente três","Um número ilimitado","O artigo fala no mágico número sete. Pesquisas posteriores, como as de Nelson Cowan, sugerem um limite menor, perto de quatro blocos de informação."],
+/* ---- Neurociências e Neuropsicologia ---- */
+["neuro",1,"Como se chama o ponto de comunicação entre dois neurônios?","Sinapse","Axônio","Dendrito","Mielina","Na maioria das sinapses, o sinal elétrico vira químico: o neurônio libera neurotransmissores que cruzam um espaço de cerca de 20 nanômetros até a célula seguinte."],
+["neuro",1,"Quantos neurônios tem, aproximadamente, o encéfalo humano?","Cerca de 86 bilhões","Cerca de 1 bilhão","Cerca de 10 trilhões","Cerca de 500 milhões","A estimativa, de 2009, é do grupo da neurocientista brasileira Suzana Herculano-Houzel, que dissolveu cérebros e contou os núcleos das células. O número antes repetido, 100 bilhões, não vinha de contagem direta."],
+["neuro",1,"Que neurotransmissor é mais associado ao sistema de recompensa e à motivação?","Dopamina","Serotonina","Acetilcolina","Adrenalina","A dopamina sinaliza mais a expectativa da recompensa do que o prazer em si: neurônios dopaminérgicos disparam forte quando algo sai melhor do que o esperado."],
+["neuro",1,"Cada hemisfério cerebral controla principalmente os movimentos de qual lado do corpo?","O lado oposto","O mesmo lado","Os dois lados igualmente","Só a cabeça e o tronco","As vias motoras se cruzam no bulbo, na chamada decussação das pirâmides. Por isso, um AVC no hemisfério esquerdo costuma paralisar o lado direito do corpo."],
+["neuro",1,"Em que lobo cerebral fica o córtex visual primário?","Occipital","Frontal","Temporal","Parietal","Ele fica na parte de trás da cabeça, longe dos olhos. Uma lesão ali pode causar cegueira cortical, mesmo com os olhos funcionando bem."],
+["neuro",1,"Que estrutura cerebral é central no processamento do medo?","Amígdala","Cerebelo","Hipotálamo","Corpo caloso","Uma paciente americana conhecida como S.M., com lesão nas duas amígdalas por uma doença rara, praticamente não sente medo, nem diante de cobras e aranhas."],
+["neuro",1,"Que parte do encéfalo coordena o equilíbrio e a precisão dos movimentos?","Cerebelo","Tálamo","Hipocampo","Lobo frontal","O cerebelo tem só cerca de 10% da massa do encéfalo, mas concentra perto de 80% de todos os neurônios."],
+["neuro",1,"Que exame registra a atividade elétrica do cérebro com eletrodos no couro cabeludo?","Eletroencefalograma","Eletrocardiograma","Ressonância magnética","Tomografia computadorizada","O psiquiatra alemão Hans Berger registrou o primeiro EEG humano em 1924 e descreveu as ondas alfa, que aparecem com olhos fechados e mente relaxada."],
+["neuro",1,"Qual é a principal função da bainha de mielina?","Acelerar a condução do impulso nervoso","Produzir neurotransmissores","Nutrir o neurônio com glicose","Guardar memórias de longo prazo","Ela isola o axônio e faz o impulso saltar entre os nódulos de Ranvier. Na esclerose múltipla, o sistema imune ataca a mielina do sistema nervoso central."],
+["neuro",1,"O que é neuroplasticidade?","A capacidade do cérebro de se reorganizar com a experiência","O endurecimento das artérias do cérebro","A produção de líquido em volta do cérebro","A perda natural de neurônios na velhice","Um estudo de 2000 com taxistas de Londres, que decoram milhares de ruas, encontrou o hipocampo posterior maior que o de outras pessoas, e maior quanto mais anos de profissão."],
+["neuro",1,"Em que fase do sono ocorrem os sonhos mais vívidos e os movimentos rápidos dos olhos?","Sono REM","Sono profundo","Adormecimento","Vigília relaxada","Nessa fase, quase todos os músculos ficam paralisados, o que nos impede de encenar os sonhos. A sigla vem do inglês rapid eye movement."],
+["neuro",1,"Qual doença neurodegenerativa é a causa mais comum de demência?","Doença de Alzheimer","Doença de Parkinson","Esclerose múltipla","Doença de Huntington","Foi descrita em 1906 pelo psiquiatra alemão Alois Alzheimer, a partir do caso de Auguste Deter, paciente que ele acompanhou desde 1901."],
+["neuro",2,"Em 1848, uma barra de ferro atravessou o crânio do ferroviário Phineas Gage. Que mudança foi relatada depois?","Mudanças marcantes de personalidade e conduta","Perda total da memória dos anos anteriores","Incapacidade definitiva de falar","Cegueira nos dois olhos","A barra atingiu sobretudo o lobo frontal. Pesquisas sobre a vida dele sugerem que depois se readaptou em parte: trabalhou anos como cocheiro de diligências no Chile."],
+["neuro",2,"Uma lesão na área de Broca, no lobo frontal esquerdo, costuma causar que dificuldade?","Produzir a fala, que sai lenta e truncada","Reconhecer rostos conhecidos","Manter o equilíbrio ao andar","Enxergar cores","Paul Broca descreveu a área em 1861, ao estudar o cérebro de Leborgne, paciente que só conseguia pronunciar a sílaba tan. Na afasia de Wernicke, a fala é fluente, mas com pouco sentido."],
+["neuro",2,"No teste de Stroop, a pessoa diz a cor da tinta de palavras como AZUL escritas em vermelho. O que ele avalia?","Controle inibitório e atenção seletiva","Daltonismo e percepção de cores","Vocabulário e fluência verbal","Memória de longo prazo","Ler é tão automático que a palavra atrapalha nomear a cor. John Ridley Stroop publicou o efeito em 1935, e o teste segue comum em avaliações neuropsicológicas."],
+["neuro",2,"O Teste Wisconsin de Classificação de Cartas avalia principalmente o quê?","Funções executivas, como a flexibilidade mental","Memória de curto prazo para números","Coordenação motora fina das mãos","Acuidade visual e percepção de cores","A pessoa precisa descobrir a regra de classificação, por cor, forma ou número, que muda sem aviso. Insistir na regra antiga, o chamado erro perseverativo, é associado a disfunções frontais."],
+["neuro",2,"Que estrutura foi cortada nos pacientes de cérebro dividido estudados por Roger Sperry?","Corpo caloso","Cerebelo","Tronco encefálico","Hipocampo","A cirurgia tratava epilepsias graves. Quando um objeto era mostrado só ao hemisfério direito, o paciente não conseguia nomeá-lo, mas o pegava com a mão esquerda. Sperry ganhou o Nobel em 1981."],
+["neuro",2,"Como se chama a incapacidade de reconhecer rostos, até de pessoas próximas?","Prosopagnosia","Anosognosia","Apraxia","Afasia","Está ligada ao giro fusiforme, no lobo temporal. O neurologista e escritor Oliver Sacks tinha a condição e escreveu sobre ela."],
+["neuro",2,"O homúnculo de Wilder Penfield, com mãos e lábios enormes, representa o mapa do corpo em quais regiões?","Nos córtices motor e somatossensorial","No cerebelo e no tronco encefálico","No hipocampo e na amígdala","No córtex visual","Penfield estimulava o cérebro de pacientes acordados durante cirurgias de epilepsia. Mãos e boca ocupam áreas enormes porque exigem controle fino e têm muita sensibilidade."],
+["neuro",3,"Quem dividiu o Nobel de 1906 com Camillo Golgi, apesar de discordar dele sobre a organização do sistema nervoso?","Santiago Ramón y Cajal","Charles Sherrington","Paul Broca","Ivan Pavlov","Usando a técnica de coloração criada por Golgi, Cajal mostrou que o sistema nervoso é formado por células separadas, os neurônios. Golgi defendia que ele era uma rede contínua."],
+["neuro",3,"A negligência espacial unilateral, em que o paciente ignora um lado do espaço, costuma surgir após lesão em qual região?","Lobo parietal direito","Lobo occipital esquerdo","Cerebelo","Lobo frontal esquerdo","O paciente pode comer só a metade direita do prato ou desenhar um relógio com todos os números de um lado. Lesões à esquerda também causam o quadro, mas com menos frequência e gravidade."],
+["neuro",3,"A síndrome de Korsakoff, que causa amnésia grave e confabulação, está ligada à falta de qual vitamina?","Tiamina (B1)","Vitamina C","Vitamina D","Vitamina B12","É comum no alcoolismo crônico, que prejudica a absorção da tiamina. Confabular é produzir lembranças falsas sem intenção de mentir."],
+["neuro",3,"Qual é o valor aproximado do potencial de repouso de um neurônio?","Cerca de −70 mV","Cerca de +70 mV","Cerca de 0 mV","Cerca de −1,5 V","O interior da célula fica negativo em relação ao exterior, graças à bomba de sódio e potássio e aos canais de potássio. No pico do potencial de ação, chega a cerca de +30 a +40 mV."]
+];
+const BANK=RAW.map(function(r,i){return {id:i,cat:r[0],lv:r[1],q:r[2],a:r[3],w:[r[4],r[5],r[6]],x:r[7]};});
+const POOL={},CAT_IDS={};
+CATS.forEach(function(c){POOL[c.key]={1:[],2:[],3:[]};CAT_IDS[c.key]=[];});
+BANK.forEach(function(q){POOL[q.cat][q.lv].push(q.id);CAT_IDS[q.cat].push(q.id);});
+
+/* ================= utilidades ================= */
+const ROUND=10;
+const app=document.getElementById('app'),live=document.getElementById('live');
+const fmt=function(n){return Number(n).toLocaleString('pt-BR');};
+const pct=function(h,n){return n?Math.round(h/n*100):0;};
+const plural=function(n,one,many){return n===1?one:many;};
+const shuffle=function(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;};
+const valid=function(id){return Number.isInteger(id)&&id>=0&&id<BANK.length;};
+const LETTERS=['A','B','C','D'];
+const JIT=[0,2,-1,1,-2,2,0,-1,1,-2];
+const SPINE={1:28,2:38,3:48};
+let DTF=null;try{DTF=new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(e){}
+const fmtDate=function(t){return DTF?DTF.format(t):new Date(t).toLocaleString();};
+const els={};
+
+/* ================= armazenamento (só neste navegador) ================= */
+const LS='repertorio.v1';
+const store={ver:2,seen:[],got:[],book:[],log:[],arch:{rounds:0,n:0,hits:0,best:0,lv:{},cat:{}},sel:null};
+(function load(){
+  let m=null;
+  try{const raw=localStorage.getItem(LS);if(raw)m=JSON.parse(raw);}catch(e){}
+  if(!m||typeof m!=='object')return;
+  if(m.ver!==2){
+    /* versão anterior: os totais não tinham data, então entram só em "Todo o período" */
+    store.arch.rounds=Number(m.rounds)||0;store.arch.n=Number(m.asked)||0;store.arch.hits=Number(m.hits)||0;store.arch.best=Number(m.best)||0;
+    if(Array.isArray(m.seen))store.seen=m.seen;
+    if(m.sel&&typeof m.sel==='object')store.sel=m.sel;
+    return;
+  }
+  Object.assign(store,m);
+  if(!Array.isArray(store.seen))store.seen=[];
+  if(!Array.isArray(store.got))store.got=[];
+  if(!Array.isArray(store.book))store.book=[];
+  if(!Array.isArray(store.log))store.log=[];
+  if(!store.arch||typeof store.arch!=='object')store.arch={rounds:0,n:0,hits:0,best:0,lv:{},cat:{}};
+  store.arch.lv=store.arch.lv||{};store.arch.cat=store.arch.cat||{};
+})();
+store.log=store.log.filter(function(r){return r&&typeof r.t==='number'&&Array.isArray(r.q)&&typeof r.k==='string'&&r.q.length===r.k.length&&r.q.every(valid);});
+const seen=new Set(store.seen.filter(valid)),got=new Set(store.got.filter(valid)),book=new Set(store.book.filter(valid));
+let sel={cat:'all',mode:'prog',timed:false,period:'all'};
+if(store.sel&&typeof store.sel==='object')Object.assign(sel,store.sel);
+function fixSel(){
+  if(!(sel.cat==='all'||CATMAP[sel.cat]||(sel.cat==='rev'&&book.size)))sel.cat='all';
+  if(!MODES[sel.mode])sel.mode='prog';
+  sel.timed=!!sel.timed;
+  if(!PMAP[sel.period])sel.period='all';
+}
+fixSel();
+function persist(){
+  store.seen=Array.from(seen);store.got=Array.from(got);store.book=Array.from(book);store.sel=sel;
+  try{localStorage.setItem(LS,JSON.stringify(store));}catch(e){}
+}
+
+/* ================= montagem das rodadas ================= */
+function poolOrder(cat,lv){
+  const ids=POOL[cat][lv];
+  return shuffle(ids.filter(function(id){return !seen.has(id);})).concat(shuffle(ids.filter(function(id){return seen.has(id);})));
+}
+function planRound(cat,mode){
+  if(cat==='rev')return shuffle(Array.from(book)).slice(0,ROUND).sort(function(a,b){return BANK[a].lv-BANK[b].lv;});
+  const keys=cat==='all'?CATS.map(function(c){return c.key;}):[cat];
+  const out=[];
+  MODES[mode].plan.forEach(function(step){
+    const lv=step[0],n=step[1];
+    const lists=shuffle(keys).map(function(k){return poolOrder(k,lv);}).filter(function(l){return l.length;});
+    const take=[];let k=0;
+    while(take.length<n&&lists.length){
+      const idx=k%lists.length,l=lists[idx];
+      take.push(l.shift());
+      if(!l.length)lists.splice(idx,1);else k++;
+    }
+    shuffle(take).forEach(function(id){out.push(id);});
+  });
+  return out;
+}
+function roundSize(cat,mode){
+  if(cat==='rev')return Math.min(ROUND,book.size);
+  const keys=cat==='all'?CATS.map(function(c){return c.key;}):[cat];
+  return MODES[mode].plan.reduce(function(t,step){
+    const avail=keys.reduce(function(a,k){return a+POOL[k][step[0]].length;},0);
+    return t+Math.min(step[1],avail);
+  },0);
+}
+function markSeen(id){
+  seen.add(id);
+  const pool=POOL[BANK[id].cat][BANK[id].lv];
+  if(pool.every(function(i){return seen.has(i);}))pool.forEach(function(i){seen.delete(i);});
+}
+function mastery(k){
+  if(!k)return {n:got.size,total:BANK.length};
+  let n=0;CAT_IDS[k].forEach(function(id){if(got.has(id))n++;});
+  return {n:n,total:CAT_IDS[k].length};
+}
+
+/* ================= registro das respostas e estatísticas ================= */
+function findLog(t){for(let i=store.log.length-1;i>=0;i--){if(store.log[i].t===t)return store.log[i];}return null;}
+function logAnswer(id,ok){
+  let r=s.logT?findLog(s.logT):null;
+  if(!r){r={t:Date.now(),c:s.cat,m:s.cat==='rev'?'rev':s.mode,s:0,q:[],k:'',d:0};store.log.push(r);s.logT=r.t;}
+  r.q.push(id);r.k+=ok?'1':'0';r.s=s.score;
+}
+function foldLog(){
+  /* acima de 5 mil rodadas, as mais antigas viram totais sem data, para não lotar o armazenamento */
+  if(store.log.length<=5000)return;
+  const old=store.log.splice(0,1000),a=store.arch;
+  old.forEach(function(r){
+    if(r.d){a.rounds++;if(r.s>a.best)a.best=r.s;}
+    r.q.forEach(function(id,j){
+      const q=BANK[id],ok=r.k.charAt(j)==='1';
+      a.n++;if(ok)a.hits++;
+      const L=a.lv[q.lv]||(a.lv[q.lv]=[0,0]);L[1]++;if(ok)L[0]++;
+      const C=a.cat[q.cat]||(a.cat[q.cat]=[0,0]);C[1]++;if(ok)C[0]++;
+    });
+  });
+}
+function aggregate(from,to,withArch){
+  const st={rounds:0,n:0,hits:0,best:0,lv:{1:[0,0],2:[0,0],3:[0,0]},cat:{},recent:[]};
+  CATS.forEach(function(c){st.cat[c.key]=[0,0];});
+  store.log.forEach(function(r){
+    if(r.t<from||r.t>=to)return;
+    if(r.d){st.rounds++;if(r.s>st.best)st.best=r.s;st.recent.push(r);}
+    for(let j=0;j<r.q.length;j++){
+      const q=BANK[r.q[j]],ok=r.k.charAt(j)==='1';
+      st.n++;st.lv[q.lv][1]++;st.cat[q.cat][1]++;
+      if(ok){st.hits++;st.lv[q.lv][0]++;st.cat[q.cat][0]++;}
+    }
+  });
+  if(withArch){
+    const a=store.arch;
+    st.rounds+=a.rounds;st.n+=a.n;st.hits+=a.hits;if(a.best>st.best)st.best=a.best;
+    Object.keys(a.lv).forEach(function(k){if(st.lv[k]){st.lv[k][0]+=a.lv[k][0];st.lv[k][1]+=a.lv[k][1];}});
+    Object.keys(a.cat).forEach(function(k){if(st.cat[k]){st.cat[k][0]+=a.cat[k][0];st.cat[k][1]+=a.cat[k][1];}});
+  }
+  st.recent.sort(function(x,y){return y.t-x.t;});
+  return st;
+}
+function statsFor(key){
+  const P=PMAP[key]||PMAP.all;
+  return aggregate(P.ms?Date.now()-P.ms:-Infinity,Infinity,!P.ms);
+}
+function deltaFor(key){
+  const P=PMAP[key];if(!P||!P.ms)return null;
+  const now=Date.now(),cur=aggregate(now-P.ms,Infinity,false),prev=aggregate(now-2*P.ms,now-P.ms,false);
+  if(!cur.n||!prev.n)return null;
+  return pct(cur.hits,cur.n)-pct(prev.hits,prev.n);
+}
+function bestExcept(t){
+  let b=store.arch.best||0;
+  store.log.forEach(function(r){if(r.d&&r.t!==t&&r.s>b)b=r.s;});
+  return b;
+}
+
+/* ================= estado do jogo ================= */
+let s=null,view='home';
+function startRound(cat,mode,timed,ids){
+  stopTimer();
+  const qids=ids&&ids.length?ids.filter(valid):planRound(cat,mode);
+  if(!qids.length){goHome();return;}
+  s={v:2,screen:'game',cat:cat,mode:mode,timed:!!timed,qids:qids,orders:qids.map(function(){return shuffle([0,1,2,3]);}),answers:[],removed:[],
+     i:0,score:0,streak:0,bestStreak:0,fiftyUsed:false,fiftyAt:-1,left:0,limit:0,newGot:0,logT:0};
+  prep();render();window.scrollTo(0,0);focusTitle();startTimer();
+}
+function prep(){s.limit=LV[BANK[s.qids[s.i]].lv].time;s.left=s.limit;}
+
+/* ---- cronômetro: anda por quadros e fica parado quando a aba está escondida ---- */
+let raf=0,lastTs=0,shownSec=-1;
+const reduceMotion=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function timerOn(){return !!(s&&s.screen==='game'&&s.timed&&!s.answers[s.i]);}
+function stopTimer(){if(raf){cancelAnimationFrame(raf);raf=0;}}
+function startTimer(){
+  stopTimer();
+  if(!timerOn())return;
+  lastTs=performance.now();shownSec=-1;paintTimer(true);
+  raf=requestAnimationFrame(frame);
+}
+function frame(ts){
+  raf=0;
+  if(!timerOn())return;
+  const dt=Math.min(.25,Math.max(0,(ts-lastTs)/1000));lastTs=ts;
+  s.left=Math.max(0,s.left-dt);
+  paintTimer(false);
+  if(s.left<=0){answer(null);return;}
+  raf=requestAnimationFrame(frame);
+}
+function paintTimer(force){
+  const sec=Math.ceil(s.left),changed=sec!==shownSec;
+  if(changed){shownSec=sec;if(els.tnum)els.tnum.textContent=sec+' s';}
+  if(els.tbar&&(force||changed||!reduceMotion)){
+    const f=Math.max(0,Math.min(1,(reduceMotion?sec:s.left)/s.limit));
+    els.tbar.style.transform='scaleX('+f+')';
+    els.tbar.classList.toggle('low',s.left<6);
+  }
+}
+
+/* ---- respostas ---- */
+function answer(pos){
+  if(!s||s.screen!=='game'||s.answers[s.i])return;
+  stopTimer();
+  const q=BANK[s.qids[s.i]],ok=pos!==null&&s.orders[s.i][pos]===0;
+  let pts=0,parts=null;
+  if(ok){
+    const base=LV[q.lv].pts,b=s.fiftyAt===s.i?Math.round(base*.6):base;
+    const sb=25*Math.min(s.streak,4),tb=s.timed?Math.round(30*Math.max(0,s.left)/s.limit):0;
+    pts=b+sb+tb;parts=[b,sb,tb];
+    s.streak++;if(s.streak>s.bestStreak)s.bestStreak=s.streak;
+    if(!got.has(q.id)){got.add(q.id);s.newGot++;}
+    book.delete(q.id);
+  }else{s.streak=0;book.add(q.id);}
+  s.score+=pts;
+  s.answers[s.i]={pick:pos,ok:ok,pts:pts,parts:parts,timeout:pos===null};
+  markSeen(q.id);logAnswer(q.id,ok);persist();
+  live.textContent=(ok?'Correto, mais '+pts+' pontos. ':(pos===null?'Tempo esgotado. ':'Incorreto. '))+'Resposta certa: '+q.a+'. '+q.x;
+  render();
+  if(els.next)els.next.focus();
+}
+function fifty(){
+  if(!s||s.fiftyUsed||s.answers[s.i])return;
+  const order=s.orders[s.i];
+  s.removed[s.i]=shuffle([0,1,2,3].filter(function(p){return order[p]!==0;})).slice(0,2);
+  s.fiftyUsed=true;s.fiftyAt=s.i;
+  render();
+  const first=app.querySelector('.opt:not(:disabled)');if(first)first.focus();
+}
+function next(){
+  if(!s||!s.answers[s.i])return;
+  if(s.i>=s.qids.length-1){finish();return;}
+  s.i++;prep();render();window.scrollTo(0,0);focusTitle();startTimer();
+}
+function finish(){
+  stopTimer();
+  s.hits=s.answers.filter(function(a){return a&&a.ok;}).length;
+  s.prevBest=bestExcept(s.logT);
+  const r=s.logT?findLog(s.logT):null;
+  if(r){r.d=1;r.s=s.score;}
+  s.newBest=s.score>0&&s.score>s.prevBest;
+  foldLog();persist();
+  s.screen='result';render();window.scrollTo(0,0);
+  const h=document.getElementById('rtitle');if(h)h.focus({preventScroll:true});
+}
+function wrongIds(){return s.qids.filter(function(id,k){return s.answers[k]&&!s.answers[k].ok;});}
+function goHome(){stopTimer();s=null;view='home';fixSel();render();window.scrollTo(0,0);}
+function openStats(){stopTimer();s=null;view='stats';render();window.scrollTo(0,0);const h=document.getElementById('st-h');if(h)h.focus({preventScroll:true});}
+function focusTitle(){const t=document.getElementById('qtitle');if(t)t.focus({preventScroll:true});}
+
+/* ================= pedaços de tela ================= */
+function lvPips(lv){return '<span class="pips" aria-hidden="true">'+[1,2,3].map(function(i){return '<i'+(i<=lv?' class="on"':'')+'></i>';}).join('')+'</span>';}
+function modePips(k){return MODES[k].rise?'<span class="pips rise" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i></span>':lvPips(MODES[k].lv);}
+function countText(n){return '· '+n+' '+plural(n,'ficha','fichas');}
+function modeDesc(n){
+  if(sel.cat==='rev')return 'No caderno, as fichas vêm da mais fácil para a mais difícil, até 10 por rodada.';
+  return MODES[sel.mode].desc+(n<ROUND?' Nesta classe, a rodada tem '+n+' fichas.':'');
+}
+function periodDesc(){
+  return PMAP[sel.period].desc+(sel.period!=='all'&&store.arch.n?' Rodadas anteriores a esta versão aparecem só em Todo o período.':'');
+}
+function periodPills(){
+  return '<div class="periods" role="radiogroup" aria-label="Período das estatísticas">'+PERIODS.map(function(p){
+    return '<label><input type="radio" name="period" value="'+p.key+'"'+(sel.period===p.key?' checked':'')+'><span>'+p.name+'</span></label>';
+  }).join('')+'</div>';
+}
+function kpiHTML(st,withDelta){
+  let delta='';
+  if(withDelta){
+    const d=deltaFor(sel.period);
+    if(d!==null){
+      const cls=d>0?'up':d<0?'down':'flat',txt=d>0?'▲ +'+d+' p.p.':d<0?'▼ '+d+' p.p.':'= sem variação';
+      delta='<span class="delta '+cls+'">'+txt+'</span><span class="sub">'+PMAP[sel.period].vs+'</span>';
+    }
+  }
+  return '<dl class="kpis">'+
+    '<div><dt>Rodadas</dt><dd>'+fmt(st.rounds)+'</dd></div>'+
+    '<div><dt>Respostas</dt><dd>'+fmt(st.n)+'</dd></div>'+
+    '<div><dt>Acertos</dt><dd class="big">'+(st.n?pct(st.hits,st.n)+'%':'—')+(st.n?'<span class="sub">'+fmt(st.hits)+' de '+fmt(st.n)+'</span>':'')+delta+'</dd></div>'+
+    '<div><dt>Melhor rodada</dt><dd>'+(st.best?fmt(st.best)+' <span class="unit">pts</span>':'—')+'</dd></div>'+
+  '</dl>';
+}
+function catRow(c,count,m){
+  const bar=m&&m.n?'<span class="mast"><span class="mbar"><span style="width:'+(m.n/m.total*100).toFixed(1)+'%"></span></span>'+m.n+' de '+m.total+' dominadas</span>':'';
+  return '<label class="cat'+(c.key==='rev'?' rev':'')+'"><input type="radio" name="cat" value="'+c.key+'"'+(sel.cat===c.key?' checked':'')+'>'+
+    '<span class="cat-body"><span class="dw">'+c.dewey+'</span><span class="nm"><strong>'+c.name+'</strong><em>'+c.desc+'</em>'+bar+'</span><span class="ct">'+count+'</span></span></label>';
+}
+function shelfHTML(cur){
+  let h='';
+  for(let k=0;k<s.qids.length;k++){
+    const a=s.answers[k],lv=BANK[s.qids[k]].lv;
+    const cls=a?(a.ok?'ok':'no'):(cur&&k===s.i?'cur':'');
+    h+='<li class="'+cls+'" style="height:'+(SPINE[lv]+JIT[k%JIT.length])+'px"></li>';
+  }
+  return '<ol class="shelf" aria-hidden="true">'+h+'</ol>';
+}
+function srow(code,name,hn){
+  const h=hn[0],n=hn[1],p=pct(h,n);
+  return '<div class="srow'+(n?'':' empty')+'"><span class="code">'+code+'</span><span class="name">'+name+'</span><span class="pct">'+(n?p+'%':'—')+'</span>'+
+    '<span class="meter" aria-hidden="true"><span style="width:'+(n?p:0)+'%"></span></span><span class="cnt">'+(n?fmt(h)+' de '+fmt(n):'sem respostas')+'</span></div>';
+}
+function recentRow(r){
+  const c=catOf(r.c),mode=r.m==='rev'?'Revisão':(MODES[r.m]?MODES[r.m].name:''),n=r.q.length;
+  let h=0;for(let j=0;j<n;j++)if(r.k.charAt(j)==='1')h++;
+  const what=r.m==='rev'?'Caderno de revisão':c.dewey+' · '+c.short+'<small>'+mode+'</small>';
+  return '<li><time datetime="'+new Date(r.t).toISOString()+'">'+fmtDate(r.t)+'</time><span class="what">'+what+'</span><span class="rres">'+h+'/'+n+'<small>'+fmt(r.s)+' pts</small></span></li>';
+}
+function rank(p){
+  if(p>=1)return ['Curador do acervo','Gabarito completo. Nenhuma ficha escapou.'];
+  if(p>=.8)return ['Bibliotecário-chefe','Repertório sólido. Faltou muito pouco.'];
+  if(p>=.6)return ['Pesquisador','Boa base. As fichas erradas abaixo rendem as melhores curiosidades.'];
+  if(p>=.4)return ['Leitor assíduo','Metade do caminho andada. Vale rever as respostas.'];
+  if(p>=.2)return ['Folheador','Você passou o olho pelo acervo. Agora é hora de ler com calma.'];
+  return ['Visitante','Primeira visita a estas estantes. A próxima rodada vai render mais.'];
+}
+function shareText(){
+  const c=catOf(s.cat),m=s.cat==='rev'?'Revisão':MODES[s.mode].name;
+  return 'Repertório · '+c.dewey+' '+c.name+' · '+m+': '+s.hits+' de '+s.qids.length+' acertos e '+fmt(s.score)+' pontos.';
+}
+
+/* ================= telas ================= */
+function viewHome(){
+  const SP=[
+    ['var(--brass)','var(--ink)'],['var(--paper)','var(--ink)'],['var(--bad)','var(--paper)'],['var(--ok-lt)','var(--ink)'],
+    ['color-mix(in srgb,var(--brass) 45%,var(--paper))','var(--ink)'],['color-mix(in srgb,var(--paper) 70%,var(--felt))','var(--ink)'],
+    ['var(--bad-lt)','var(--ink)'],['color-mix(in srgb,var(--ok) 55%,var(--paper))','var(--ink)'],['color-mix(in srgb,var(--brass) 62%,var(--felt))','var(--paper)']
+  ];
+  const HT=[84,98,76,104,90,72,94,80,88];
+  const spines=CATS.map(function(c,i){return '<span style="height:'+HT[i]+'px;--bg:'+SP[i][0]+';--fg:'+SP[i][1]+'">'+c.dewey+'</span>';}).join('');
+  const n=roundSize(sel.cat,sel.mode);
+  const rows=[];
+  if(book.size)rows.push(catRow(REV,book.size+' '+plural(book.size,'ficha','fichas'),null));
+  rows.push(catRow(ALL,BANK.length+' fichas',mastery(null)));
+  CATS.forEach(function(c){rows.push(catRow(c,CAT_IDS[c.key].length+' fichas',mastery(c.key)));});
+  const segs=Object.keys(MODES).map(function(k){
+    return '<label><input type="radio" name="mode" value="'+k+'"'+(sel.mode===k?' checked':'')+'><span class="seg-b">'+modePips(k)+MODES[k].name+'</span></label>';
+  }).join('');
+  return ''+
+  '<header class="hero">'+
+    '<p class="tag">Fichário de curiosidades · '+BANK.length+' fichas · '+CATS.length+' classes · 3 níveis</p>'+
+    '<h1>Repertório<span>.</span></h1>'+
+    '<p class="lede">Rodadas de dez fichas, do nível fácil ao difícil, sobre história, livros, ciência, mente e cérebro, arte e mundo. Cada resposta traz uma curiosidade para levar.</p>'+
+    '<div class="spines" aria-hidden="true">'+spines+'</div>'+
+  '</header>'+
+  '<section class="readerbox" aria-labelledby="rd-h">'+
+    '<div class="rhead"><h2 class="tag" id="rd-h">Ficha do leitor</h2><button type="button" class="link" data-act="stats">Ver estatísticas</button></div>'+
+    periodPills()+'<p class="pdesc" id="pdesc">'+periodDesc()+'</p>'+
+    '<div id="kpiHome">'+kpiHTML(statsFor(sel.period),false)+'</div>'+
+  '</section>'+
+  '<form id="setup" onsubmit="return false">'+
+    '<fieldset class="levels" id="levels"'+(sel.cat==='rev'?' disabled':'')+'><legend class="tag">Nível da rodada</legend>'+
+      '<div class="seg">'+segs+'</div><p class="mode-desc" id="modeDesc">'+modeDesc(n)+'</p></fieldset>'+
+    '<fieldset><legend class="tag">Escolha uma classe</legend><div class="cats">'+rows.join('')+'</div></fieldset>'+
+    '<div class="dock">'+
+      '<label class="sw"><input type="checkbox" id="timed"'+(sel.timed?' checked':'')+'><span class="sw-box" aria-hidden="true"></span><span>Cronômetro <small>20 a 30 s</small></span></label>'+
+      '<button type="button" class="btn" data-act="start"'+(n?'':' disabled')+'>Abrir a rodada <span class="cnt" id="startCount">'+countText(n)+'</span></button>'+
+    '</div>'+
+  '</form>'+
+  '<p class="note">Ficha fácil vale 100 pontos, média 150 e difícil 200, mais bônus por sequência e, com cronômetro, por rapidez. O cronômetro dá 20, 25 ou 30 segundos conforme o nível e fica parado se você sair da aba. O 50/50 tira 40% do valor da ficha.</p>'+
+  '<p class="note">Fichas erradas vão para o caderno de revisão e saem de lá quando você acerta. As classes seguem a Classificação Decimal de Dewey; 612.8 é a cota dos livros sobre o funcionamento do sistema nervoso.</p>';
+}
+function viewGame(){
+  const q=BANK[s.qids[s.i]],c=catOf(q.cat),L=LV[q.lv],order=s.orders[s.i],texts=[q.a,q.w[0],q.w[1],q.w[2]];
+  const ans=s.answers[s.i],gone=s.removed[s.i]||[],last=s.i>=s.qids.length-1;
+  let opts='';
+  for(let pos=0;pos<4;pos++){
+    const oi=order[pos];let cls='',key=LETTERS[pos],tail='';
+    if(ans){
+      if(oi===0){cls='ok';key='✓';tail='<span class="sr"> (resposta certa)</span>';}
+      else if(ans.pick===pos){cls='no';key='✕';tail='<span class="sr"> (sua resposta)</span>';}
+      else cls='dim';
+    }else if(gone.indexOf(pos)>=0)cls='gone';
+    const dis=ans||gone.indexOf(pos)>=0;
+    opts+='<li><button type="button" class="opt '+cls+'" data-pos="'+pos+'"'+(dis?' disabled':'')+'><span class="k" aria-hidden="true">'+key+'</span><span>'+texts[oi]+tail+'</span></button></li>';
+  }
+  let foot;
+  if(ans){
+    let sub='';
+    if(ans.ok&&ans.parts){const p=ans.parts;sub=p[0]+' do nível'+(s.fiftyAt===s.i?' (50/50)':'')+(p[1]?' + '+p[1]+' de sequência':'')+(p[2]?' + '+p[2]+' de tempo':'');}
+    foot='<div class="foot"><span class="stamp '+(ans.ok?'ok':'no')+'">'+(ans.timeout?'Tempo esgotado':ans.ok?'Confirmado':'Revisar')+'</span>'+
+      '<span class="pts-w"><span class="pts">'+(ans.ok?'+'+fmt(ans.pts):'0')+' pts</span>'+(sub?'<span class="pts-sub">'+sub+'</span>':'')+'</span></div>';
+  }else{
+    foot='<div class="foot"><button type="button" class="link" data-act="fifty"'+(s.fiftyUsed?' disabled':'')+'>Consultar o acervo (50/50)</button><span class="hint">teclas 1 a 4</span></div>';
+  }
+  const after=ans
+    ?'<div class="fact"><p class="tag brass">Ficha de curiosidade</p><p>'+q.x+'</p></div>'+
+     '<div class="nextrow"><button type="button" class="btn" id="next" data-act="next">'+(last?'Ver resultado':'Próxima ficha')+' →</button></div>'
+    :'';
+  const timerRow=s.timed
+    ?'<div class="trow"><div class="timer"><i id="tbar" style="transform:scaleX('+Math.max(0,Math.min(1,s.left/s.limit))+')"></i></div><span id="tnum" class="tag">'+Math.ceil(Math.max(0,s.left))+' s</span></div>'
+    :'';
+  return ''+
+  '<div class="hud">'+
+    '<div class="hud-l"><button type="button" class="link" data-act="exit">Sair</button>'+(s.streak>=2?'<span class="chip">Sequência '+s.streak+'</span>':'')+'</div>'+
+    '<div class="score"><span class="tag">Pontos</span><b>'+fmt(s.score)+'</b></div>'+
+  '</div>'+
+  shelfHTML(true)+timerRow+
+  '<section class="card" aria-labelledby="qtitle">'+
+    '<div class="card-head"><span>'+c.dewey+' · '+c.short+'</span><span class="lvl">'+lvPips(q.lv)+L.name+' · '+(s.i+1)+'/'+s.qids.length+'</span></div>'+
+    '<h2 class="q" id="qtitle" tabindex="-1">'+q.q+'</h2>'+
+    '<ul class="opts">'+opts+'</ul>'+foot+
+  '</section>'+after;
+}
+function viewResult(){
+  const n=s.qids.length,rk=rank(n?s.hits/n:0),c=catOf(s.cat),modeName=s.cat==='rev'?'Revisão':MODES[s.mode].name;
+  const per={1:[0,0],2:[0,0],3:[0,0]};
+  s.qids.forEach(function(id,k){const lv=BANK[id].lv;per[lv][1]++;if(s.answers[k]&&s.answers[k].ok)per[lv][0]++;});
+  const chips=[1,2,3].filter(function(lv){return per[lv][1];}).map(function(lv){return '<span class="lvchip">'+lvPips(lv)+LV[lv].name+' <b>'+per[lv][0]+'/'+per[lv][1]+'</b></span>';}).join('');
+  const wrong=[];
+  s.qids.forEach(function(id,k){const a=s.answers[k];if(a&&!a.ok)wrong.push({q:BANK[id],a:a,order:s.orders[k]});});
+  const review=wrong.length?wrong.map(function(r){
+    const texts=[r.q.a,r.q.w[0],r.q.w[1],r.q.w[2]],cc=catOf(r.q.cat);
+    const given=r.a.timeout?'Tempo esgotado.':'Você marcou: '+texts[r.order[r.a.pick]]+'.';
+    return '<article class="card mini"><div class="card-head"><span>'+cc.dewey+' · '+cc.short+'</span><span class="lvl">'+lvPips(r.q.lv)+LV[r.q.lv].name+'</span></div>'+
+      '<h4 class="q sm">'+r.q.q+'</h4><p class="given">✕ '+given+'</p><p class="right">✓ Resposta certa: '+r.q.a+'.</p><p>'+r.q.x+'</p></article>';
+  }).join(''):'<p class="clean">Nenhuma ficha para revisar nesta rodada.</p>';
+  const canAgain=s.cat!=='rev'||book.size>0;
+  const recLine=(s.newBest?'Novo recorde pessoal':'Recorde pessoal: '+fmt(Math.max(s.prevBest||0,s.score))+' pts')+
+    (s.newGot?' · +'+s.newGot+' '+plural(s.newGot,'ficha dominada','fichas dominadas'):'');
+  return ''+
+  '<section class="result">'+
+    '<p class="tag">Rodada concluída · '+c.dewey+' '+c.short+' · '+modeName+'</p>'+
+    '<h2 id="rtitle" tabindex="-1">'+rk[0]+'</h2>'+
+    '<p class="msg">'+rk[1]+'</p>'+
+    '<dl class="kpis k3">'+
+      '<div><dt>Pontos</dt><dd class="big">'+fmt(s.score)+'</dd></div>'+
+      '<div><dt>Acertos</dt><dd>'+s.hits+'/'+n+'</dd></div>'+
+      '<div><dt>Maior sequência</dt><dd>'+s.bestStreak+'</dd></div>'+
+    '</dl>'+
+    '<div class="lvrow">'+chips+'</div>'+
+    '<p class="tag'+(s.newBest?' brass':'')+'">'+recLine+'</p>'+
+    '<div class="rshelf">'+shelfHTML(false)+'</div>'+
+    '<div class="actions">'+
+      (canAgain?'<button type="button" class="btn" data-act="again">'+(s.cat==='rev'?'Revisar mais':'Jogar de novo')+'</button>':'')+
+      (wrong.length?'<button type="button" class="btn ghost" data-act="review">'+(wrong.length===1?'Revisar a ficha errada':'Revisar as '+wrong.length+' erradas')+'</button>':'')+
+    '</div>'+
+    '<div class="links">'+
+      '<button type="button" class="link" data-act="menu">Trocar de classe</button>'+
+      '<button type="button" class="link" data-act="stats">Estatísticas</button>'+
+      '<button type="button" class="link" data-act="copy">Copiar resultado</button>'+
+    '</div>'+
+    '<p class="copyout" id="copyout" hidden><label class="sr" for="copytext">Resultado para copiar</label><input id="copytext" type="text" readonly></p>'+
+    (s.cat==='rev'&&!book.size?'<p class="clean">Caderno de revisão vazio: todas as fichas erradas já foram acertadas.</p>':'')+
+    '<div class="review"><h3 class="tag">Para revisar ('+wrong.length+')</h3>'+review+'</div>'+
+  '</section>';
+}
+function viewStats(){
+  const st=statsFor(sel.period),m=mastery(null);
+  const lvRows=[1,2,3].map(function(lv){return srow(lvPips(lv),LV[lv].name,st.lv[lv]);}).join('');
+  const catRows=CATS.map(function(c){return srow(c.dewey,c.name,st.cat[c.key]);}).join('');
+  const recent=st.recent.slice(0,8).map(recentRow).join('');
+  const brk=st.lv[1][1]+st.lv[2][1]+st.lv[3][1];
+  return ''+
+  '<div class="hud"><button type="button" class="link" data-act="menu">← Voltar</button></div>'+
+  '<section aria-labelledby="st-h">'+
+    '<p class="tag">Ficha do leitor</p><h2 class="sth" id="st-h" tabindex="-1">Estatísticas</h2>'+
+    periodPills()+'<p class="pdesc">'+periodDesc()+'</p>'+
+    kpiHTML(st,true)+
+    (st.n?'':'<p class="empty-note">Nenhuma resposta registrada neste período.</p>')+
+    '<div class="sec"><h3 class="tag">Acerto por nível</h3>'+lvRows+'</div>'+
+    '<div class="sec"><h3 class="tag">Acerto por classe</h3>'+catRows+'</div>'+
+    (st.n>brk?'<p class="note">'+fmt(st.n-brk)+' '+plural(st.n-brk,'resposta','respostas')+' de antes desta versão '+plural(st.n-brk,'entra','entram')+' no total, mas não tem divisão por nível ou classe.</p>':'')+
+    '<div class="sec"><h3 class="tag">Últimas rodadas concluídas</h3>'+(recent?'<ol class="recent">'+recent+'</ol>':'<p class="empty-note">Nenhuma rodada concluída neste período.</p>')+'</div>'+
+    '<div class="sec"><h3 class="tag">Acervo</h3><dl class="kpis k2">'+
+      '<div><dt>Fichas dominadas</dt><dd>'+fmt(m.n)+' <span class="unit">de '+m.total+'</span></dd></div>'+
+      '<div><dt>No caderno de revisão</dt><dd>'+fmt(book.size)+'</dd></div>'+
+    '</dl><p class="note">Dominadas são as fichas que você já acertou ao menos uma vez, em qualquer período. O caderno guarda as erradas até você acertá-las.</p></div>'+
+    '<p class="note">Os períodos contam para trás a partir de agora: 1 mês são os últimos 30 dias, e 1 ano, os últimos 365. Respostas de rodadas interrompidas entram no acerto; só rodadas concluídas contam como rodada. Tudo fica salvo apenas neste navegador.</p>'+
+    '<div class="actions"><button type="button" class="btn" data-act="menu">Voltar ao início</button></div>'+
+  '</section>';
+}
+function render(){
+  app.innerHTML=s?(s.screen==='game'?viewGame():viewResult()):(view==='stats'?viewStats():viewHome());
+  els.tbar=document.getElementById('tbar');els.tnum=document.getElementById('tnum');els.next=document.getElementById('next');
+}
+function updateSetup(){
+  const n=roundSize(sel.cat,sel.mode);
+  const cnt=document.getElementById('startCount'),desc=document.getElementById('modeDesc'),lv=document.getElementById('levels'),st=app.querySelector('[data-act="start"]');
+  if(cnt)cnt.textContent=countText(n);
+  if(lv)lv.disabled=sel.cat==='rev';
+  if(desc)desc.textContent=modeDesc(n);
+  if(st)st.disabled=!n;
+}
+function copyResult(b){
+  const text=shareText();
+  const fallback=function(){
+    const o=document.getElementById('copyout');
+    if(o){o.hidden=false;const i=o.querySelector('input');i.value=text;i.focus();i.select();}
+    b.textContent='Copie o texto abaixo';
+  };
+  try{
+    navigator.clipboard.writeText(text).then(function(){b.textContent='Copiado';},fallback);
+  }catch(e){fallback();}
+}
+
+/* ================= eventos ================= */
+app.addEventListener('click',function(e){
+  const opt=e.target.closest('[data-pos]');
+  if(opt){answer(Number(opt.dataset.pos));return;}
+  const b=e.target.closest('[data-act]');if(!b||b.disabled)return;
+  const act=b.dataset.act;
+  if(act==='start')startRound(sel.cat,sel.mode,sel.timed);
+  else if(act==='fifty')fifty();
+  else if(act==='next')next();
+  else if(act==='again')startRound(s.cat,s.mode,s.timed);
+  else if(act==='review')startRound('rev',s.mode,s.timed,wrongIds());
+  else if(act==='menu')goHome();
+  else if(act==='stats')openStats();
+  else if(act==='copy')copyResult(b);
+  else if(act==='exit'){
+    if(b.dataset.confirm){goHome();}
+    else{
+      b.dataset.confirm='1';b.textContent='Confirmar saída';
+      setTimeout(function(){if(b.isConnected){delete b.dataset.confirm;b.textContent='Sair';}},3500);
+    }
+  }
+});
+app.addEventListener('change',function(e){
+  const t=e.target;
+  if(t.name==='period'){
+    sel.period=t.value;persist();
+    if(!s&&view==='stats'){
+      render();
+      const r=app.querySelector('input[name="period"][value="'+sel.period+'"]');if(r)r.focus();
+    }else{
+      const k=document.getElementById('kpiHome'),d=document.getElementById('pdesc');
+      if(k)k.innerHTML=kpiHTML(statsFor(sel.period),false);
+      if(d)d.textContent=periodDesc();
+    }
+    return;
+  }
+  if(t.name==='cat')sel.cat=t.value;
+  else if(t.name==='mode')sel.mode=t.value;
+  else if(t.id==='timed')sel.timed=t.checked;
+  else return;
+  persist();updateSetup();
+});
+document.addEventListener('keydown',function(e){
+  if(e.ctrlKey||e.metaKey||e.altKey||!s||s.screen!=='game')return;
+  const ans=s.answers[s.i],k=(e.key||'').toLowerCase();
+  if(!ans){
+    let pos=-1;
+    if(k.length===1&&'1234'.indexOf(k)>=0)pos=Number(k)-1;
+    else if(k.length===1&&'abcd'.indexOf(k)>=0)pos=k.charCodeAt(0)-97;
+    if(pos>=0){
+      if((s.removed[s.i]||[]).indexOf(pos)>=0)return;
+      e.preventDefault();answer(pos);
+    }
+  }else if(e.key==='Enter'&&!e.target.closest('button')){
+    e.preventDefault();next();
+  }
+});
+
+/* ================= início e retomada depois de uma nova versão ================= */
+if(window.claude&&window.claude.hot&&window.claude.hot.snapshot){
+  window.claude.hot.snapshot(function(){return JSON.parse(JSON.stringify({v:2,s:s,sel:sel,view:view}));});
+}
+function boot(d){
+  d=d||{};
+  if(d.sel&&typeof d.sel==='object'){Object.assign(sel,d.sel);fixSel();}
+  view=d.v===2&&d.view==='stats'?'stats':'home';
+  const r=d.v===2?d.s:null;
+  if(r&&(r.screen==='game'||r.screen==='result')&&Array.isArray(r.qids)&&r.qids.length&&r.qids.every(valid)&&
+     Array.isArray(r.orders)&&r.orders.length===r.qids.length&&r.i>=0&&r.i<r.qids.length){
+    s=r;
+    if(!Array.isArray(s.answers))s.answers=[];
+    if(!Array.isArray(s.removed))s.removed=[];
+    if(!s.limit)prep();
+    render();
+    if(s.screen==='game')startTimer();
+  }else{s=null;render();}
+}
+if(window.claude&&window.claude.hot&&window.claude.hot.ready)window.claude.hot.ready(boot);
+else boot((window.claude&&window.claude.hot&&window.claude.hot.data)||{});
+</script>
+</body>
+</html>
