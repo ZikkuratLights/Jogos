@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0c0806">
+<title>Abajur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400&family=Literata:opsz,wght@7..72,400;7..72,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Ideia: um abajur num quarto escuro. A luz quente baixa conforme a sessão avança e apaga no fim. Sem azul e sem pontos. */
+  --night:#0c0806;
+  --deep:#16100b;
+  --line:#2c2016;
+  --ember:#c48b55;
+  --sand:#b08b69;
+  --dim:#927560;
+  --display:"Comfortaa","Trebuchet MS",system-ui,sans-serif;
+  --body:"Literata",Georgia,"Times New Roman",serif;
+  --glow:.55;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+html{background:var(--night)}
+body{margin:0;background:var(--night);color:var(--sand);font-family:var(--body);font-size:18px;line-height:1.6;-webkit-font-smoothing:antialiased;transition:background-color 3s}
+body.off{background:#000}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.room{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 75% 55% at 50% 24%,rgba(196,139,85,.17),rgba(196,139,85,.05) 45%,rgba(196,139,85,0) 75%);opacity:calc(var(--glow) / .55)}
+body.off .room{opacity:0;transition:opacity 3s}
+.wrap{position:relative;max-width:560px;margin:0 auto;padding:24px 18px 48px;min-height:100%}
+button{font:inherit;color:inherit}
+.link{background:none;border:0;padding:10px 2px;min-height:44px;color:var(--dim);font-family:var(--display);font-size:.85rem;letter-spacing:.04em;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.link:focus-visible,.go:focus-visible,.ghost:focus-visible,.mode:focus-visible,.notice:focus-visible{outline:2px solid var(--ember);outline-offset:3px}
+
+/* ---------- abajur ---------- */
+.lamp{position:relative;width:132px;height:146px;margin:4px auto 0}
+.halo{position:absolute;left:50%;top:44%;width:280px;height:220px;border-radius:50%;transform:translate(-50%,-50%) scale(calc(.5 + var(--glow)));background:radial-gradient(closest-side,rgba(222,166,108,.5),rgba(196,139,85,.12) 62%,rgba(196,139,85,0));opacity:calc(var(--glow) * 1.7);pointer-events:none}
+.lamp svg{position:relative;display:block;width:100%;height:100%;overflow:visible}
+.shade{fill:var(--ember);fill-opacity:calc(.15 + var(--glow) * 1.25);stroke:var(--ember);stroke-width:1.5;stroke-linejoin:round}
+.stem{fill:none;stroke:var(--ember);stroke-width:1.5;stroke-linecap:round;opacity:.6}
+.base{fill:var(--ember);fill-opacity:.25;stroke:var(--ember);stroke-width:1.5;opacity:.7}
+.bead{fill:var(--ember);opacity:.7}
+h1{font-family:var(--display);font-weight:300;font-size:clamp(2.6rem,12vw,3.5rem);letter-spacing:.03em;line-height:1.1;text-align:center;margin:6px 0 8px;color:#d4a373}
+.lede{text-align:center;max-width:27em;margin:0 auto;color:var(--dim);text-wrap:balance}
+
+/* ---------- início ---------- */
+.notice{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;margin:22px 0 0;padding:12px 16px;border:1px dashed #4a3524;border-radius:14px;background:transparent;text-align:left;cursor:pointer}
+.notice span{font-family:var(--display);font-size:.95rem;color:#d0a172}
+.notice small{font-size:.85rem;color:var(--dim);white-space:nowrap}
+.modes{display:grid;gap:10px;margin:26px 0 0;padding:0;list-style:none}
+.mode{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;width:100%;padding:14px 16px;background:var(--deep);border:1px solid var(--line);border-radius:14px;text-align:left;cursor:pointer;transition:border-color .2s}
+.mode:hover{border-color:#4a3524}
+.mode.feat{border-color:#56402b;background:linear-gradient(180deg,#1c140d,#140e0a)}
+.mode b{display:block;font-family:var(--display);font-weight:400;font-size:1.06rem;letter-spacing:.01em;color:#d0a172}
+.mode .d{display:block;font-size:.92rem;line-height:1.4;color:var(--dim)}
+.mode .t{font-family:var(--display);font-size:.78rem;color:var(--dim);white-space:nowrap;align-self:start;padding-top:3px}
+.ic{width:44px;height:44px;fill:none;stroke:var(--ember);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tips{margin:26px 0 0;padding:14px 16px;border-left:2px solid #56402b;color:var(--dim);font-size:.95rem}
+.tips b{color:var(--sand);font-weight:500}
+.settings{margin:26px 0 0;padding:6px 16px 10px;border:1px solid var(--line);border-radius:14px;background:var(--deep)}
+.settings h3,.why h3{font-family:var(--display);font-weight:400;font-size:1rem;letter-spacing:.02em;color:#d0a172;margin:10px 0 2px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:14px;min-height:52px;border-bottom:1px solid var(--line);font-size:.98rem}
+.row:last-of-type{border-bottom:0}
+.sw{position:relative;cursor:pointer}
+.sw input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.sw-box{position:relative;flex:none;width:44px;height:24px;border-radius:12px;background:#33251a;transition:background .2s}
+.sw-box::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#7a5e47;transition:transform .2s,background .2s}
+.sw input:checked+.sw-box{background:#6b4a2d}
+.sw input:checked+.sw-box::after{transform:translateX(20px);background:#e0b182}
+.sw input:focus-visible+.sw-box{outline:2px solid var(--ember);outline-offset:3px}
+.vol input{flex:1;max-width:240px;accent-color:var(--ember)}
+.why{margin:30px 0 0}
+.why p,.why li{color:var(--dim);font-size:.95rem}
+.why p{margin:4px 0 12px}
+.why ul{margin:4px 0 12px;padding-left:1.1em}
+.why li{margin:0 0 8px}
+.why b{color:var(--sand);font-weight:500}
+
+/* ---------- preparo ---------- */
+.back{margin:-6px 0 0}
+h2{font-family:var(--display);font-weight:300;font-size:2rem;letter-spacing:.02em;color:#d4a373;margin:6px 0 10px}
+h2:focus{outline:none}
+.how{margin:0 0 20px;max-width:34em}
+.og{border:0;margin:0 0 18px;padding:0;min-width:0}
+.og legend{padding:0;margin:0 0 8px;font-family:var(--display);font-size:.82rem;letter-spacing:.06em;color:var(--dim)}
+.og[hidden]{display:none}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pills label,.scenes label{position:relative;cursor:pointer}
+.pills input,.scenes input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.pills span{display:inline-flex;align-items:center;min-height:44px;padding:8px 16px;border:1px solid var(--line);border-radius:99px;background:var(--deep);font-family:var(--display);font-size:.88rem;color:var(--dim)}
+.pills input:checked+span{border-color:var(--ember);color:#dcad7d}
+.scenes{display:grid;gap:8px}
+.scenes label{display:block}
+.scenes span{display:block;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--deep)}
+.scenes b{display:block;font-family:var(--display);font-weight:400;color:#d0a172}
+.scenes em{display:block;font-style:normal;font-size:.9rem;line-height:1.45;color:var(--dim)}
+.scenes input:checked+span{border-color:var(--ember)}
+.pills input:focus-visible+span,.scenes input:focus-visible+span{outline:2px solid var(--ember);outline-offset:3px}
+.go{display:block;width:100%;min-height:56px;margin:22px 0 10px;border:0;border-radius:99px;background:#7e5532;color:#f2d6b6;font-family:var(--display);font-size:1.05rem;letter-spacing:.04em;cursor:pointer;transition:background .2s}
+.go:hover{background:#8d6039}
+.ghost{display:block;width:100%;min-height:52px;border:1px solid var(--line);border-radius:99px;background:transparent;color:var(--sand);font-family:var(--display);font-size:.95rem;cursor:pointer}
+.hint{font-size:.92rem;color:var(--dim);margin:10px 0 0}
+
+/* ---------- gaveta ---------- */
+.g-list{display:grid;gap:8px;margin:0 0 4px;padding:0;list-style:none;counter-reset:g;transition:transform 1.1s ease,opacity 1.1s ease}
+.g-list li{display:grid;grid-template-columns:22px 1fr;align-items:center;gap:8px}
+.g-list li::before{counter-increment:g;content:counter(g);font-family:var(--display);font-size:.9rem;color:var(--dim);text-align:right}
+.g-in{width:100%;min-height:48px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--deep);color:var(--sand);font:inherit;font-size:1rem}
+.g-in::placeholder{color:#6f5845}
+.g-in:focus{outline:2px solid var(--ember);outline-offset:2px}
+.g-list.away{transform:translateY(26px) scale(.94);opacity:0}
+.saved{text-align:center;padding:30px 0 6px}
+.saved svg{width:96px;height:96px}
+.saved p{margin:10px auto 0;max-width:24em}
+.items{margin:0 0 12px;padding-left:1.2em}
+.items li{margin:0 0 6px}
+
+/* ---------- sessão ---------- */
+.session{display:flex;flex-direction:column;min-height:calc(100vh - 72px);min-height:calc(100dvh - 72px)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;transition:opacity 1.2s}
+.stage{font-family:var(--display);font-size:.8rem;letter-spacing:.06em;color:var(--dim);text-align:right}
+.session.idle .topbar,.session.idle .caption{opacity:0}
+.stagebox{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:12px 0;text-align:center;opacity:calc(.3 + var(--glow) * 1.3)}
+.caption{margin:0;min-height:3.2em;text-align:center;font-size:.92rem;color:var(--dim);transition:opacity 1.2s}
+.orb{width:min(62vw,270px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 46%,rgba(226,170,112,.62),rgba(196,139,85,.2) 56%,rgba(196,139,85,0) 72%);transform:scale(.58);opacity:.5;transition-property:transform,opacity;transition-duration:4s;transition-timing-function:cubic-bezier(.37,0,.63,1)}
+.orb.in{transform:scale(1);opacity:1}
+.phase{margin:0;min-height:1.6em;font-family:var(--display);font-size:1.15rem;letter-spacing:.06em;color:#c9976a}
+.prompt{max-width:22em;margin:0;font-size:clamp(1.3rem,5.6vw,1.65rem);line-height:1.55;color:#c79a70;opacity:0;transition:opacity 2.5s ease}
+.prompt.show{opacity:1}
+.prompt.show.fade{opacity:.16;transition-duration:7s}
+.word{display:flex;gap:.55em;font-family:var(--display);font-size:1.45rem;letter-spacing:.08em;color:var(--dim);transition:opacity 6s}
+.word .on{color:#d7a674}
+.word .done{opacity:.45}
+.letter{font-family:var(--display);font-weight:300;font-size:min(42vw,220px);line-height:1;color:var(--ember);transition:opacity 6s}
+.ex{margin:0;font-size:1rem;color:var(--dim);transition:opacity 6s}
+.stagebox.fade .letter{opacity:.25}
+.stagebox.fade .ex,.stagebox.fade .word{opacity:.18}
+.end{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;min-height:calc(100vh - 72px);min-height:calc(100dvh - 72px)}
+.goodnight{margin:0;font-family:var(--display);font-weight:300;font-size:1.5rem;color:#7a5e47;animation:fadeaway 10s ease forwards}
+@keyframes fadeaway{0%,35%{opacity:1}100%{opacity:0}}
+.end .ghost{max-width:260px}
+
+@media (prefers-reduced-motion:reduce){
+  .orb,.orb.in{transform:none}
+  .g-list.away{transform:none}
+  .goodnight{animation-duration:5s}
+}
+</style>
+</head>
+<body>
+<div class="room" aria-hidden="true"></div>
+<main class="wrap" id="app"></main>
+<div id="live" class="sr" aria-live="polite"></div>
+<script>
+'use strict';
+
+/* ================= conteúdo ================= */
+const SCENES={
+  praia:{name:'Praia à noite',first:'Areia fria, ondas pequenas, uma lua sobre o mar.',lines:[
+    'Você caminha devagar por uma praia vazia, à noite. A areia está fria e macia sob os pés.',
+    'O mar chega em ondas pequenas, sem pressa, e volta para longe com um chiado suave.',
+    'A lua deixa um caminho de luz sobre a água, que se desfaz e se forma de novo.',
+    'Você se senta na areia. Ela ainda guarda um resto do calor do dia.',
+    'Uma brisa morna passa pelo seu rosto e pelos seus braços.',
+    'Ao longe, a luz de um barco de pesca balança, pequena e lenta.',
+    'Cada onda que chega parece dizer que agora não há nada para fazer.',
+    'Você se deita e escuta o mar, cada vez mais longe.'
+  ]},
+  chuva:{name:'Chuva na janela',first:'Cama quente, cobertor pesado, chuva fina lá fora.',lines:[
+    'Você está deitado numa cama macia, coberto até o queixo. Lá fora, começa a chover.',
+    'As gotas batem no vidro da janela, umas apressadas, outras devagar.',
+    'O cheiro de terra molhada entra pelo vão da janela.',
+    'O quarto está escuro e quentinho. Só a chuva se mexe lá fora.',
+    'Você sente o peso gostoso do cobertor sobre as pernas.',
+    'Um trovão bem distante rola pelo céu, baixinho, e some.',
+    'A chuva fica mais fina, num ritmo constante, como um sussurro.',
+    'Você não precisa ir a lugar nenhum. A chuva cuida da noite.'
+  ]},
+  cabana:{name:'Cabana na serra',first:'Lareira baixa, neblina no vale, uma manta grossa.',lines:[
+    'Você chega a uma cabana de madeira no alto da serra, no fim da tarde.',
+    'Lá dentro, uma lareira estala baixinho e espalha um calor alaranjado.',
+    'Você tira os sapatos e sente o tapete grosso sob os pés.',
+    'Pela janela, a neblina cobre devagar as árvores do vale.',
+    'Você segura uma caneca de chá morno, que aquece as mãos.',
+    'A madeira da cabana range de leve quando o vento passa.',
+    'As brasas da lareira brilham e apagam, brilham e apagam.',
+    'Você se enrola numa manta e deixa os olhos pesarem.'
+  ]},
+  lago:{name:'Barco no lago',first:'Um barquinho parado, água calma, céu de estrelas.',lines:[
+    'Você está deitado num pequeno barco de madeira, parado no meio de um lago calmo.',
+    'O barco balança de leve, para um lado e para o outro.',
+    'A água bate no casco com um som macio e regular.',
+    'Acima de você, o céu está cheio de estrelas, sem pressa de nada.',
+    'O ar cheira a mato e a água doce.',
+    'Uma corrente fraquinha leva o barco devagar, sem rumo.',
+    'Você solta os braços. A madeira do barco segura todo o seu peso.',
+    'O balanço continua, cada vez mais lento, como uma rede.'
+  ]}
+};
+const WORDS=['LUAR','VELA','MANTA','NUVEM','FOLHA','PRAIA','JANELA','CAMPO','PEDRA','MAPA','LIVRO','TRIGO','CORDA','BALDE','GARFO','PIANO','BOTA','CESTA','TOALHA','SINO','RODA','BANCO','FIGO','MOLA','TELHA'];
+const EX={
+  A:['abacate','aquário','árvore','avião de papel','abelha','almofada'],
+  B:['bicicleta','balão','banana','barco','bolo','borboleta'],
+  C:['cachorro','caneca','castelo','cebola','coruja','cesto de pão'],
+  D:['dado','dente-de-leão','dominó','damasco','disco de vinil','dedal'],
+  E:['escada','elefante','envelope','estrela-do-mar','espiga de milho','esquilo'],
+  F:['farol','flauta','formiga','framboesa','fogueira','foguete'],
+  G:['girassol','guarda-chuva','gato','gaivota','goiaba','gaveta'],
+  H:['hortelã','hipopótamo','harpa','horta','hotel antigo','helicóptero'],
+  I:['iglu','ilha','ímã','ioiô','iogurte','igrejinha'],
+  J:['jabuticaba','jardim','jarra','joaninha','jangada','janela redonda'],
+  L:['lareira','limão','lápis','leão dormindo','lanterna','lago'],
+  M:['maçã','montanha','moinho','meia de lã','melancia','mochila'],
+  N:['navio','ninho','novelo de lã','nuvem','noz','nariz de palhaço'],
+  O:['ovelha','ostra','óculos','ônibus','orquídea','ovo'],
+  P:['pipa','pinguim','panela','pera','poltrona','pão de queijo'],
+  R:['rede','regador','relógio de parede','rosa','raposa','rio'],
+  S:['sapato','sabonete','sorvete','sereia','sino','sofá'],
+  T:['tartaruga','tomate','travesseiro','trem','tucano','tambor'],
+  U:['uva','urso de pelúcia','ukulele','umbu','unicórnio','urubu'],
+  V:['vela','violão','vaso','vaca','veleiro','ventilador']
+};
+const MODES=[
+  {k:'ritual',name:'Ritual completo',d:'Anote o que ficou para amanhã, respire com a maré e termine numa paisagem ou embaralhando palavras.',t:'~10 min',feat:true,ic:'moon'},
+  {k:'gaveta',name:'Gaveta',d:'Tire da cabeça o que precisa fazer amanhã.',t:'2 min',ic:'drawer'},
+  {k:'mare',name:'Maré',d:'Respiração lenta guiada por um som de ondas.',t:'3 a 10 min',ic:'wave'},
+  {k:'paisagem',name:'Paisagem',d:'Uma cena tranquila, uma frase de cada vez.',t:'6 ou 10 min',ic:'hills'},
+  {k:'embaralhar',name:'Embaralhar',d:'Imagens soltas, uma letra de cada vez.',t:'5 a 15 min',ic:'letters'}
+];
+const ICON={
+  moon:'<svg class="ic" viewBox="0 0 44 44" aria-hidden="true"><path d="M27 9a13 13 0 1 0 9 21A11 11 0 0 1 27 9z"/></svg>',
+  drawer:'<svg class="ic" viewBox="0 0 44 44" aria-hidden="true"><rect x="8" y="11" width="28" height="23" rx="3"/><path d="M8 22.5h28M18.5 28h7M18.5 16.5h7"/></svg>',
+  wave:'<svg class="ic" viewBox="0 0 44 44" aria-hidden="true"><path d="M6 17c4-4 8-4 12 0s8 4 12 0c3-3 6-3 8-1"/><path d="M6 25c4-4 8-4 12 0s8 4 12 0c3-3 6-3 8-1"/><path d="M6 33c4-4 8-4 12 0s8 4 12 0c3-3 6-3 8-1" opacity=".5"/></svg>',
+  hills:'<svg class="ic" viewBox="0 0 44 44" aria-hidden="true"><circle cx="31" cy="13" r="3.5"/><path d="M5 34 15 22l7 7 6-8 11 13z"/></svg>',
+  letters:'<svg class="ic" viewBox="0 0 44 44" aria-hidden="true"><path d="M8 33 15 12l7 21M10.5 26h9"/><path d="M26 23c2-2.4 7.5-2.4 8.5 1v9M34.5 27.5c-6-1-9.5 1-9.5 3.2 0 2.7 5 3.4 9.5-.3"/></svg>'
+};
+const LAMP='<div class="lamp" aria-hidden="true"><div class="halo"></div><svg viewBox="0 0 132 146"><path class="shade" d="M42 18H90L108 66H24Z"/><path class="stem" d="M66 66V126"/><path class="stem" d="M97 66v17"/><circle class="bead" cx="97" cy="86" r="2.6"/><path class="base" d="M40 132Q66 121 92 132Q66 139 40 132Z"/></svg></div>';
+const PH=['Ex.: responder a mensagem do grupo','Ex.: separar a roupa de amanhã cedo','Ex.: ligar para marcar a consulta','',''];
+
+/* ================= preferências e gaveta (só neste aparelho) ================= */
+const LS='abajur.v1';
+const prefs={som:true,ruido:true,vol:60,mareDur:5,ritmo:'46',cena:'praia',pDur:6,eDur:10,letra:45,fim:'paisagem'};
+let gaveta=null;
+(function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem(LS)||'null');
+    if(!d||typeof d!=='object')return;
+    if(d.prefs&&typeof d.prefs==='object')Object.keys(prefs).forEach(function(k){if(typeof d.prefs[k]===typeof prefs[k])prefs[k]=d.prefs[k];});
+    if(d.gaveta&&typeof d.gaveta.t==='number'&&Array.isArray(d.gaveta.itens))gaveta={t:d.gaveta.t,itens:d.gaveta.itens.filter(function(x){return typeof x==='string'&&x.trim();}).slice(0,5)};
+  }catch(e){}
+})();
+if([3,5,10].indexOf(prefs.mareDur)<0)prefs.mareDur=5;
+if(['46','55'].indexOf(prefs.ritmo)<0)prefs.ritmo='46';
+if(!SCENES[prefs.cena])prefs.cena='praia';
+if([6,10].indexOf(prefs.pDur)<0)prefs.pDur=6;
+if([5,10,15].indexOf(prefs.eDur)<0)prefs.eDur=10;
+if([30,45,60].indexOf(prefs.letra)<0)prefs.letra=45;
+if(['paisagem','embaralhar'].indexOf(prefs.fim)<0)prefs.fim='paisagem';
+prefs.vol=Math.max(0,Math.min(100,Number(prefs.vol)||0));
+function save(){try{localStorage.setItem(LS,JSON.stringify({prefs:prefs,gaveta:gaveta}));}catch(e){}}
+
+/* ================= utilidades ================= */
+const G0=.55;
+const app=document.getElementById('app'),live=document.getElementById('live');
+const SP=function(){return window.__abajurSpeed||1;};
+const now=function(){return performance.now()*SP();};
+const esc=function(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+const shuffle=function(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;};
+function setGlow(g){document.documentElement.style.setProperty('--glow',Math.max(0,g).toFixed(3));}
+function whenText(t){
+  const d=new Date(t),today=new Date(),y=new Date();y.setDate(today.getDate()-1);
+  const hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  if(d.toDateString()===today.toDateString())return 'guardadas hoje às '+hm;
+  if(d.toDateString()===y.toDateString())return 'guardadas ontem às '+hm;
+  return 'guardadas em '+String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
+}
+
+/* ================= som (gerado no próprio navegador) ================= */
+const Audio={
+  ac:null,master:null,buf:null,bed:null,wave:null,
+  init:function(){
+    if(!this.ac){
+      const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;
+      try{this.ac=new AC();}catch(e){this.ac=null;return false;}
+      this.master=this.ac.createGain();this.master.gain.value=0;this.master.connect(this.ac.destination);
+      this.buf=this.brown();
+    }
+    if(this.ac.state==='suspended'&&this.ac.resume)this.ac.resume().catch(function(){});
+    return true;
+  },
+  brown:function(){
+    /* ruído marrom: soa como mar ou vento distante */
+    const ac=this.ac,len=Math.floor(ac.sampleRate*6),buf=ac.createBuffer(1,len,ac.sampleRate),d=buf.getChannelData(0);
+    let last=0,peak=0;
+    for(let i=0;i<len;i++){const w=Math.random()*2-1;last=(last+.02*w)/1.02;d[i]=last;}
+    const drift=d[len-1]-d[0];
+    for(let i=0;i<len;i++){d[i]-=drift*i/(len-1);if(Math.abs(d[i])>peak)peak=Math.abs(d[i]);}
+    const k=peak?.9/peak:1;for(let i=0;i<len;i++)d[i]*=k;
+    return buf;
+  },
+  source:function(){const s=this.ac.createBufferSource();s.buffer=this.buf;s.loop=true;return s;},
+  setVolume:function(v){if(!this.ac)return;const t=this.ac.currentTime;this.master.gain.cancelScheduledValues(t);this.master.gain.setTargetAtTime(v*.85,t,.4);},
+  fadeOut:function(sec){if(!this.ac)return;const g=this.master.gain,t=this.ac.currentTime;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(0,t+sec);},
+  sleep:function(){if(this.ac&&this.ac.state==='running'&&this.ac.suspend)this.ac.suspend().catch(function(){});},
+  startBed:function(level){
+    if(!this.ac||this.bed)return;
+    const s=this.source(),f=this.ac.createBiquadFilter(),g=this.ac.createGain();
+    f.type='lowpass';f.frequency.value=420;g.gain.value=0;
+    s.connect(f);f.connect(g);g.connect(this.master);s.start();
+    g.gain.setTargetAtTime(level,this.ac.currentTime,2);
+    this.bed={s:s,g:g};
+  },
+  stopBed:function(){
+    if(!this.ac||!this.bed)return;
+    const b=this.bed,t=this.ac.currentTime;b.g.gain.cancelScheduledValues(t);b.g.gain.setTargetAtTime(0,t,1.2);
+    try{b.s.stop(t+6);}catch(e){}
+    this.bed=null;
+  },
+  startWave:function(){
+    if(!this.ac||this.wave)return;
+    const s=this.source(),f=this.ac.createBiquadFilter(),g=this.ac.createGain();
+    f.type='lowpass';f.frequency.value=240;f.Q.value=.4;g.gain.value=.02;
+    s.connect(f);f.connect(g);g.connect(this.master);s.start();
+    this.wave={s:s,f:f,g:g};
+  },
+  breath:function(phase,secs){
+    if(!this.ac||!this.wave)return;
+    const w=this.wave,t=this.ac.currentTime;
+    [[w.f.frequency,phase==='in'?950:240],[w.g.gain,phase==='in'?.26:.025]].forEach(function(p){
+      p[0].cancelScheduledValues(t);p[0].setValueAtTime(p[0].value,t);p[0].linearRampToValueAtTime(p[1],t+secs);
+    });
+  },
+  stopWave:function(){
+    if(!this.ac||!this.wave)return;
+    const w=this.wave,t=this.ac.currentTime;
+    w.g.gain.cancelScheduledValues(t);w.g.gain.setTargetAtTime(0,t,.8);
+    try{w.s.stop(t+5);}catch(e){}
+    this.wave=null;
+  },
+  chime:function(){
+    if(!this.ac)return;
+    const ac=this.ac,t=ac.currentTime,m=this.master;
+    [[392,.07],[588,.035],[784,.02]].forEach(function(p){
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type='sine';o.frequency.value=p[0];
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(p[1],t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+3.2);
+      o.connect(g);g.connect(m);o.start(t);o.stop(t+3.4);
+    });
+  }
+};
+
+/* ---- manter a tela acesa durante a sessão, quando o navegador permitir ---- */
+let wakeLock=null;
+function keepAwake(on){
+  try{
+    if(on&&!wakeLock&&navigator.wakeLock&&navigator.wakeLock.request){
+      navigator.wakeLock.request('screen').then(function(l){wakeLock=l;l.addEventListener('release',function(){wakeLock=null;});}).catch(function(){});
+    }else if(!on&&wakeLock){wakeLock.release().catch(function(){});wakeLock=null;}
+  }catch(e){}
+}
+
+/* ================= estado ================= */
+let view='home',prepMode='mare',ritual=false,draft=['','','','',''],testT=0,esvaziarArmed=false;
+const sess={stages:[],i:-1,t0:0,stT0:0,total:0,timer:0,timeouts:[],pk:-1,word:'',pos:-1,li:-1,lastWord:''};
+function setTimer(fn,ms){sess.timeouts.push(setTimeout(fn,ms));}
+function clearTimers(){sess.timeouts.forEach(clearTimeout);sess.timeouts=[];}
+function durFor(m){return m==='mare'?prefs.mareDur*60:m==='paisagem'?prefs.pDur*60:prefs.eDur*60;}
+
+/* ================= telas ================= */
+function pills(name,opts){
+  return '<div class="pills">'+opts.map(function(o){return '<label><input type="radio" name="'+name+'" value="'+o[0]+'"'+(String(prefs[name])===String(o[0])?' checked':'')+'><span>'+o[1]+'</span></label>';}).join('')+'</div>';
+}
+function scenesHTML(){
+  return '<div class="scenes">'+Object.keys(SCENES).map(function(k){const s=SCENES[k];return '<label><input type="radio" name="cena" value="'+k+'"'+(prefs.cena===k?' checked':'')+'><span><b>'+s.name+'</b><em>'+s.first+'</em></span></label>';}).join('')+'</div>';
+}
+function viewHome(){
+  const g=gaveta&&gaveta.itens.length
+    ?'<button type="button" class="notice" data-act="gavetaVer"><span>Na gaveta: '+gaveta.itens.length+' '+(gaveta.itens.length===1?'anotação':'anotações')+'</span><small>'+whenText(gaveta.t)+' · abrir</small></button>'
+    :'';
+  return LAMP+
+  '<h1>Abajur</h1>'+
+  '<p class="lede">Brincadeiras lentas para a hora de dormir. Sem pontos e sem relógio correndo: a luz vai baixando até apagar.</p>'+
+  g+
+  '<ul class="modes">'+MODES.map(function(m){
+    return '<li><button type="button" class="mode'+(m.feat?' feat':'')+'" data-act="prep" data-mode="'+m.k+'">'+ICON[m.ic]+'<span><b>'+m.name+'</b><span class="d">'+m.d+'</span></span><span class="t">'+m.t+'</span></button></li>';
+  }).join('')+'</ul>'+
+  '<p class="tips"><b>Antes de começar:</b> brilho no mínimo, modo noturno ligado e volume baixo. Depois de iniciar, você pode virar o celular para baixo; o som guia o resto e a luz da página apaga sozinha no fim.</p>'+
+  '<section class="settings" aria-labelledby="som-h"><h3 id="som-h">Som</h3>'+
+    '<label class="row sw"><span>Sino e ondas</span><input type="checkbox" id="som"'+(prefs.som?' checked':'')+'><span class="sw-box" aria-hidden="true"></span></label>'+
+    '<label class="row sw"><span>Ruído de fundo na paisagem e nas palavras</span><input type="checkbox" id="ruido"'+(prefs.ruido?' checked':'')+'><span class="sw-box" aria-hidden="true"></span></label>'+
+    '<label class="row vol" for="vol"><span>Volume</span><input type="range" id="vol" min="0" max="100" step="5" value="'+prefs.vol+'"></label>'+
+    '<button type="button" class="link" data-act="test">Ouvir o sino</button>'+
+  '</section>'+
+  '<section class="why">'+
+    '<h3>Por que não tem pontos nem cronômetro</h3>'+
+    '<p>Na hora de dormir, o que mais pesa não é tanto a luz da tela, e sim ficar ligado: competir, correr contra o relógio, querer só mais uma rodada. Aqui tudo é lento, repetitivo e termina sozinho.</p>'+
+    '<h3>De onde vêm as brincadeiras</h3>'+
+    '<ul>'+
+      '<li><b>Gaveta.</b> Num estudo de laboratório com 57 jovens, quem passou 5 minutos escrevendo o que precisava fazer nos dias seguintes pegou no sono mais rápido do que quem listou o que já tinha feito. Listas mais específicas funcionaram melhor.</li>'+
+      '<li><b>Paisagem.</b> Pessoas com insônia que imaginaram uma cena tranquila e detalhada dormiram mais cedo do que quando se distraíram de outros jeitos, como contando.</li>'+
+      '<li><b>Maré.</b> Respirar devagar, perto de seis vezes por minuto, ajuda o corpo a desacelerar. Os estudos sobre sono ainda são poucos e pequenos; vale o ritmo que for confortável.</li>'+
+      '<li><b>Embaralhar.</b> Imita os pensamentos soltos, sem enredo, de quem está adormecendo. A técnica foi criada pelo pesquisador Luc Beaudoin, e as evidências ainda são preliminares.</li>'+
+    '</ul>'+
+    '<p>Nada disso substitui tratamento. Se a dificuldade para dormir durar semanas, procure um profissional de saúde; a terapia cognitivo-comportamental para insônia (TCC-I) é o tratamento mais recomendado.</p>'+
+  '</section>';
+}
+function viewPrep(){
+  const back='<button type="button" class="link back" data-act="home">← Voltar</button>';
+  let title='',how='',opts='',hint='';
+  if(prepMode==='mare'){
+    title='Maré';
+    how='Siga a luz: ela cresce enquanto você puxa o ar e encolhe enquanto você solta. Pelo nariz ou pela boca, do jeito mais confortável, e sem prender o ar. Se der tontura ou desconforto, volte a respirar no seu ritmo.';
+    opts='<fieldset class="og"><legend>Duração</legend>'+pills('mareDur',[[3,'3 min'],[5,'5 min'],[10,'10 min']])+'</fieldset>'+
+         '<fieldset class="og"><legend>Ritmo</legend>'+pills('ritmo',[['46','Puxa 4 s, solta 6 s'],['55','Puxa 5 s, solta 5 s']])+'</fieldset>';
+    hint='Depois de começar, pode fechar os olhos: o som das ondas sobe quando é hora de puxar o ar e recua quando é hora de soltar.';
+  }else if(prepMode==='paisagem'){
+    title='Paisagem';
+    how='Uma frase curta aparece de cada vez. Leia, feche os olhos e imagine a cena com calma: sons, cheiros, temperatura. Não precisa acertar nada.';
+    opts='<fieldset class="og"><legend>Cena</legend>'+scenesHTML()+'</fieldset>'+
+         '<fieldset class="og"><legend>Duração</legend>'+pills('pDur',[[6,'6 min'],[10,'10 min']])+'</fieldset>';
+    hint='Um sino baixinho avisa quando há uma frase nova. Se já estiver sonolento, não precisa abrir os olhos.';
+  }else if(prepMode==='embaralhar'){
+    title='Embaralhar';
+    how='Uma palavra aparece. Para cada letra, imagine coisas que começam com ela, uma de cada vez, por alguns segundos cada: um limão, uma lareira, um lago. Não tente ligar uma imagem à outra.';
+    opts='<fieldset class="og"><legend>Duração</legend>'+pills('eDur',[[5,'5 min'],[10,'10 min'],[15,'15 min']])+'</fieldset>'+
+         '<fieldset class="og"><legend>Tempo em cada letra</legend>'+pills('letra',[[30,'30 s'],[45,'45 s'],[60,'60 s']])+'</fieldset>';
+    hint='O sino avisa a hora de passar para a próxima letra. Quando a palavra acaba, vem outra.';
+  }else{
+    title='Ritual completo';
+    how='Primeiro a gaveta, para tirar da cabeça o que ficou para amanhã (pode pular). Depois 3 minutos de maré e 6 minutos do final que você escolher. No fim, a luz apaga sozinha.';
+    opts='<fieldset class="og"><legend>Final do ritual</legend>'+pills('fim',[['paisagem','Paisagem'],['embaralhar','Embaralhar']])+'</fieldset>'+
+         '<fieldset class="og"'+(prefs.fim==='paisagem'?'':' hidden')+'><legend>Cena</legend>'+scenesHTML()+'</fieldset>';
+    hint='Deixe o celular perto e com o volume baixo antes de deitar.';
+  }
+  return back+'<h2 id="vh" tabindex="-1">'+title+'</h2><p class="how">'+how+'</p>'+opts+
+    '<button type="button" class="go" data-act="begin">Começar</button><p class="hint">'+hint+'</p>';
+}
+function viewGaveta(){
+  const rows=[0,1,2,3,4].map(function(i){
+    return '<li><input class="g-in" type="text" maxlength="90" id="g'+i+'" aria-label="Pendência '+(i+1)+'" placeholder="'+esc(PH[i])+'" value="'+esc(draft[i]||'')+'"></li>';
+  }).join('');
+  const back='<button type="button" class="link back" data-act="'+(ritual?'backPrep':'home')+'">← Voltar</button>';
+  return back+'<h2 id="vh" tabindex="-1">Gaveta</h2>'+
+    '<p class="how">Escreva o que você precisa fazer amanhã ou nos próximos dias. Seja específico: em vez de “estudar”, algo como “revisar o capítulo 3 depois do almoço”. Escrever já basta; não precisa resolver nada agora.</p>'+
+    '<ol class="g-list" id="glist">'+rows+'</ol>'+
+    (ritual
+      ?'<button type="button" class="go" data-act="guardar">Guardar e seguir</button><button type="button" class="ghost" data-act="pular">Pular a gaveta</button>'
+      :'<button type="button" class="go" data-act="guardar">Guardar na gaveta</button>')+
+    '<p class="hint">Fica salvo só neste aparelho, para você reencontrar amanhã.</p>';
+}
+const DRAWER='<svg viewBox="0 0 96 96" aria-hidden="true" class="ic" style="width:96px;height:96px"><rect x="16" y="26" width="64" height="48" rx="5"/><path d="M16 50h64M41 61h14M41 38h14"/></svg>';
+function viewSaved(){
+  return '<div class="saved">'+DRAWER+'<h2 id="vh" tabindex="-1">Guardado</h2><p>Está anotado. Amanhã você reencontra tudo aqui; agora não precisa pensar nisso.</p></div>'+
+    '<button type="button" class="go" data-act="toMare">Seguir para a maré</button>'+
+    '<button type="button" class="ghost" data-act="home">Voltar ao início</button>';
+}
+function viewGavetaVer(){
+  const list=gaveta&&gaveta.itens.length?'<ol class="items">'+gaveta.itens.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ol><p class="hint">'+whenText(gaveta.t).replace('guardadas','Guardadas')+'.</p>':'<p class="hint">A gaveta está vazia.</p>';
+  return '<button type="button" class="link back" data-act="home">← Voltar</button><h2 id="vh" tabindex="-1">Gaveta</h2>'+list+
+    (gaveta&&gaveta.itens.length?'<button type="button" class="ghost" data-act="esvaziar" id="esv">Esvaziar a gaveta</button>':'')+
+    '<button type="button" class="go" data-act="home">Voltar ao início</button>';
+}
+function viewSession(){
+  return '<div class="session" id="session">'+
+    '<div class="topbar"><button type="button" class="link" data-act="stop">Encerrar</button><span class="stage" id="stageName"></span></div>'+
+    '<div class="stagebox" id="stagebox"></div>'+
+    '<p class="caption" id="caption"></p>'+
+  '</div>';
+}
+function viewEnd(){
+  return '<div class="end"><p class="goodnight">A luz apagou. Boa noite.</p><button type="button" class="ghost" data-act="home" id="endback" hidden>Voltar ao início</button></div>';
+}
+function render(){
+  app.innerHTML=view==='home'?viewHome():view==='prep'?viewPrep():view==='gaveta'?viewGaveta():view==='saved'?viewSaved():
+    view==='gavetaVer'?viewGavetaVer():view==='session'?viewSession():viewEnd();
+}
+function focusH(){const h=document.getElementById('vh');if(h)h.focus({preventScroll:true});}
+function go(v){view=v;render();window.scrollTo(0,0);focusH();}
+
+/* ================= sessão ================= */
+function begin(stages){
+  if(prefs.som&&Audio.init())Audio.setVolume(prefs.vol/100);
+  keepAwake(true);
+  clearInterval(sess.timer);clearTimers();
+  sess.stages=stages;sess.total=stages.reduce(function(t,s){return t+s.dur;},0);sess.t0=now();sess.i=-1;
+  document.body.classList.remove('off');setGlow(G0);
+  view='session';render();window.scrollTo(0,0);
+  nextStage();
+  sess.timer=setInterval(tick,250);
+  armIdle();
+}
+function startRitual(){begin([{kind:'mare',dur:180},{kind:prefs.fim,dur:360}]);}
+function nextStage(){
+  clearTimers();
+  sess.i++;
+  if(sess.i>=sess.stages.length){endSession();return;}
+  sess.stT0=now();
+  enterStage(sess.stages[sess.i]);
+}
+function tick(){
+  if(view!=='session')return;
+  const t=(now()-sess.t0)/1000;
+  setGlow(G0*(1-Math.min(1,t/sess.total)));
+  const st=sess.stages[sess.i];if(!st)return;
+  const lt=(now()-sess.stT0)/1000;
+  if(lt>=st.dur){nextStage();return;}
+  if(st.kind==='paisagem'){
+    const lines=SCENES[prefs.cena].lines,iv=st.dur/lines.length,k=Math.min(lines.length-1,Math.floor(lt/iv));
+    if(k!==sess.pk){sess.pk=k;showPrompt(lines[k],k>0);}
+  }else if(st.kind==='embaralhar'){
+    const idx=Math.floor(lt/prefs.letra);
+    if(idx!==sess.li){sess.li=idx;nextLetter(idx>0);}
+  }
+}
+function enterStage(st){
+  const box=document.getElementById('stagebox'),name=document.getElementById('stageName'),cap=document.getElementById('caption');
+  if(!box)return;
+  if(st.kind==='mare'){
+    name.textContent='Maré';
+    box.innerHTML='<div class="orb" id="orb"></div><p class="phase" id="phase"></p>';
+    cap.textContent=prefs.som?'Pode fechar os olhos: o som das ondas acompanha a respiração. Sem prender o ar.':'Siga a luz no seu ritmo, sem prender o ar.';
+    Audio.stopBed();if(prefs.som)Audio.startWave();
+    requestAnimationFrame(function(){requestAnimationFrame(function(){breathe('in');});});
+  }else if(st.kind==='paisagem'){
+    name.textContent='Paisagem · '+SCENES[prefs.cena].name;
+    box.innerHTML='<p class="prompt" id="prompt"></p>';
+    cap.textContent=prefs.som?'Leia, feche os olhos e imagine com calma. O sino avisa quando houver uma frase nova.':'Leia, feche os olhos e imagine com calma.';
+    Audio.stopWave();if(prefs.som&&prefs.ruido)Audio.startBed(.08);
+    sess.pk=-1;
+  }else{
+    name.textContent='Embaralhar';
+    box.innerHTML='<div class="word" id="word" aria-hidden="true"></div><div class="letter" id="letter" aria-hidden="true"></div><p class="ex" id="ex"></p>';
+    cap.textContent=prefs.som?'Uma imagem de cada vez, sem ligar uma à outra. O sino avisa a hora de trocar de letra.':'Uma imagem de cada vez, sem ligar uma à outra.';
+    Audio.stopWave();if(prefs.som&&prefs.ruido)Audio.startBed(.08);
+    sess.word='';sess.pos=-1;sess.li=-1;
+  }
+}
+function breathe(phase){
+  const st=sess.stages[sess.i];
+  if(view!=='session'||!st||st.kind!=='mare')return;
+  const ti=prefs.ritmo==='55'?5:4,te=prefs.ritmo==='55'?5:6,secs=(phase==='in'?ti:te)/SP();
+  const orb=document.getElementById('orb'),ph=document.getElementById('phase');
+  if(orb){orb.style.transitionDuration=secs+'s';orb.classList.toggle('in',phase==='in');}
+  if(ph)ph.textContent=phase==='in'?'puxe o ar':'solte devagar';
+  Audio.breath(phase,secs);
+  setTimer(function(){breathe(phase==='in'?'out':'in');},secs*1000);
+}
+function showPrompt(text,ring){
+  const el=document.getElementById('prompt');if(!el)return;
+  if(ring&&prefs.som)Audio.chime();
+  el.classList.remove('show','fade');
+  setTimer(function(){
+    el.textContent=text;void el.offsetWidth;el.classList.add('show');live.textContent=text;
+    setTimer(function(){el.classList.add('fade');},14000/SP());
+  },(ring?1600:200)/SP());
+}
+function pickWord(){let w;do{w=WORDS[Math.floor(Math.random()*WORDS.length)];}while(w===sess.lastWord&&WORDS.length>1);sess.lastWord=w;return w;}
+function nextLetter(ring){
+  if(!sess.word||sess.pos>=sess.word.length-1){sess.word=pickWord();sess.pos=0;}else sess.pos++;
+  const L=sess.word.charAt(sess.pos);
+  if(ring&&prefs.som)Audio.chime();
+  const w=document.getElementById('word'),le=document.getElementById('letter'),ex=document.getElementById('ex'),box=document.getElementById('stagebox');
+  if(!w)return;
+  w.innerHTML=sess.word.split('').map(function(c,i){return '<span class="'+(i===sess.pos?'on':i<sess.pos?'done':'')+'">'+c+'</span>';}).join('');
+  le.textContent=L;
+  const two=shuffle(EX[L]||[]).slice(0,2);
+  ex.textContent=two.length?'por exemplo: '+two.join(', ')+'…':'';
+  live.textContent='Letra '+L+'. '+ex.textContent;
+  box.classList.remove('fade');
+  setTimer(function(){box.classList.add('fade');},12000/SP());
+}
+function endSession(){
+  clearInterval(sess.timer);sess.timer=0;clearTimers();
+  Audio.stopWave();Audio.stopBed();Audio.fadeOut(6);
+  setTimeout(function(){if(view!=='session')Audio.sleep();},8000);
+  keepAwake(false);setGlow(0);document.body.classList.add('off');
+  view='end';render();window.scrollTo(0,0);
+}
+function stopSession(){
+  clearInterval(sess.timer);sess.timer=0;clearTimers();
+  Audio.stopWave();Audio.stopBed();Audio.fadeOut(1.2);
+  setTimeout(function(){if(view!=='session')Audio.sleep();},2500);
+  keepAwake(false);goHome();
+}
+function goHome(){document.body.classList.remove('off');setGlow(G0);ritual=false;esvaziarArmed=false;go('home');}
+
+/* ---- controles somem durante a sessão; o primeiro toque só os mostra de novo ---- */
+let idleT=0,swallow=false,endT=0;
+function armIdle(){
+  clearTimeout(idleT);
+  const se=document.getElementById('session');if(se)se.classList.remove('idle');
+  idleT=setTimeout(function(){const se=document.getElementById('session');if(se)se.classList.add('idle');},10000/Math.min(SP(),10));
+}
+document.addEventListener('pointerdown',function(e){
+  if(view==='session'){
+    const se=document.getElementById('session');
+    if(se&&se.classList.contains('idle'))swallow=true;
+    armIdle();
+  }else if(view==='end'){
+    const b=document.getElementById('endback');
+    if(b&&b.hidden){b.hidden=false;swallow=true;clearTimeout(endT);endT=setTimeout(function(){const b=document.getElementById('endback');if(b)b.hidden=true;},8000);}
+  }
+},true);
+document.addEventListener('click',function(e){if(swallow){swallow=false;e.preventDefault();e.stopPropagation();}},true);
+document.addEventListener('keydown',function(){if(view==='session')armIdle();});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&view==='session')keepAwake(true);});
+
+/* ================= gaveta ================= */
+function guardar(){
+  const itens=draft.map(function(s){return s.trim();}).filter(Boolean).slice(0,5);
+  if(itens.length){gaveta={t:Date.now(),itens:itens};save();}
+  draft=['','','','',''];
+  if(ritual&&prefs.som)Audio.init();
+  const list=document.getElementById('glist');if(list)list.classList.add('away');
+  setTimeout(function(){if(ritual)startRitual();else go('saved');},itens.length?1300:150);
+}
+
+/* ================= eventos ================= */
+app.addEventListener('click',function(e){
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act;
+  if(a==='prep'){
+    const m=b.dataset.mode;
+    if(m==='gaveta'){ritual=false;go('gaveta');}else{prepMode=m;go('prep');}
+  }else if(a==='home')goHome();
+  else if(a==='begin'){
+    if(prepMode==='ritual'){ritual=true;if(prefs.som)Audio.init();go('gaveta');}
+    else begin([{kind:prepMode,dur:durFor(prepMode)}]);
+  }
+  else if(a==='backPrep'){ritual=false;prepMode='ritual';go('prep');}
+  else if(a==='guardar')guardar();
+  else if(a==='pular'){if(prefs.som)Audio.init();startRitual();}
+  else if(a==='toMare'){prepMode='mare';go('prep');}
+  else if(a==='stop')stopSession();
+  else if(a==='gavetaVer'){esvaziarArmed=false;go('gavetaVer');}
+  else if(a==='esvaziar'){
+    if(!esvaziarArmed){esvaziarArmed=true;b.textContent='Toque de novo para esvaziar';setTimeout(function(){if(b.isConnected&&esvaziarArmed){esvaziarArmed=false;b.textContent='Esvaziar a gaveta';}},4000);}
+    else{gaveta=null;save();esvaziarArmed=false;go('gavetaVer');}
+  }
+  else if(a==='test'){
+    if(Audio.init()){Audio.setVolume(prefs.vol/100);Audio.chime();}
+    clearTimeout(testT);testT=setTimeout(function(){if(view!=='session')Audio.sleep();},4500);
+  }
+});
+app.addEventListener('change',function(e){
+  const t=e.target;
+  if(t.id==='som'){prefs.som=t.checked;save();return;}
+  if(t.id==='ruido'){prefs.ruido=t.checked;save();return;}
+  if(t.type==='radio'&&Object.prototype.hasOwnProperty.call(prefs,t.name)){
+    prefs[t.name]=typeof prefs[t.name]==='number'?Number(t.value):t.value;save();
+    if(t.name==='fim'){render();const r=app.querySelector('input[name="fim"][value="'+t.value+'"]');if(r)r.focus();}
+  }
+});
+app.addEventListener('input',function(e){
+  const t=e.target;
+  if(t.id==='vol'){prefs.vol=Number(t.value);save();if(Audio.ac&&Audio.ac.state==='running')Audio.setVolume(prefs.vol/100);}
+  else if(t.classList&&t.classList.contains('g-in')){draft[Number(t.id.slice(1))]=t.value;}
+});
+
+/* ================= início ================= */
+if(window.claude&&window.claude.hot&&window.claude.hot.snapshot){
+  window.claude.hot.snapshot(function(){return {v:1,draft:draft.slice()};});
+}
+function boot(d){
+  if(d&&d.v===1&&Array.isArray(d.draft))draft=d.draft.slice(0,5).map(function(x){return typeof x==='string'?x:'';});
+  while(draft.length<5)draft.push('');
+  setGlow(G0);view='home';render();
+}
+if(window.claude&&window.claude.hot&&window.claude.hot.ready)window.claude.hot.ready(boot);
+else boot((window.claude&&window.claude.hot&&window.claude.hot.data)||{});
+</script>
+</body>
+</html>
